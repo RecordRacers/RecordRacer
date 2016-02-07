@@ -1,4 +1,4 @@
-package com.superpowered.recordracer;
+package com.sd2.recordracer;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
