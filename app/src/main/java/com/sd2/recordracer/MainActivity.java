@@ -16,6 +16,7 @@ import android.widget.RadioGroup;
 import android.widget.Button;
 import android.view.View;
 
+// this activity is the main activity
 public class MainActivity extends AppCompatActivity {
     boolean playing = false;
 
