@@ -41,20 +41,21 @@
   /Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/sys/ucontext.h \
   /Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/sys/user.h \
   /Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/sched.h \
+  /Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/android/log.h \
   /Users/apple/Desktop/RecordRacer/app/src/main/jni/../../../../../Superpowered/SuperpoweredAdvancedAudioPlayer.h \
   /Users/apple/Desktop/RecordRacer/app/src/main/jni/../../../../../Superpowered/SuperpoweredFilter.h \
   ../../../../../Superpowered/SuperpoweredFX.h \
+  /Users/apple/Desktop/RecordRacer/app/src/main/jni/../../../../../Superpowered/SuperpoweredResampler.h \
   /Users/apple/Desktop/RecordRacer/app/src/main/jni/../../../../../Superpowered/SuperpoweredRoll.h \
   /Users/apple/Desktop/RecordRacer/app/src/main/jni/../../../../../Superpowered/SuperpoweredFlanger.h \
   /Users/apple/Desktop/RecordRacer/app/src/main/jni/../../../../../Superpowered/SuperpoweredAndroidAudioIO.h \
-  ../../../../../Superpowered/SuperpoweredSimple.h \
+  /Users/apple/Desktop/RecordRacer/app/src/main/jni/../../../../../Superpowered/SuperpoweredSimple.h \
   /Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/jni.h \
   /Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/stdlib.h \
   /Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/alloca.h \
   /Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/strings.h \
   /Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/memory.h \
   /Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/stdio.h \
-  /Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/android/log.h \
   /Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/SLES/OpenSLES.h \
   /Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/SLES/OpenSLES_Platform.h \
   /Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/SLES/OpenSLES_AndroidConfiguration.h
@@ -141,11 +142,15 @@
 
 /Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/sched.h:
 
+/Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/android/log.h:
+
 /Users/apple/Desktop/RecordRacer/app/src/main/jni/../../../../../Superpowered/SuperpoweredAdvancedAudioPlayer.h:
 
 /Users/apple/Desktop/RecordRacer/app/src/main/jni/../../../../../Superpowered/SuperpoweredFilter.h:
 
 ../../../../../Superpowered/SuperpoweredFX.h:
+
+/Users/apple/Desktop/RecordRacer/app/src/main/jni/../../../../../Superpowered/SuperpoweredResampler.h:
 
 /Users/apple/Desktop/RecordRacer/app/src/main/jni/../../../../../Superpowered/SuperpoweredRoll.h:
 
@@ -153,7 +158,7 @@
 
 /Users/apple/Desktop/RecordRacer/app/src/main/jni/../../../../../Superpowered/SuperpoweredAndroidAudioIO.h:
 
-../../../../../Superpowered/SuperpoweredSimple.h:
+/Users/apple/Desktop/RecordRacer/app/src/main/jni/../../../../../Superpowered/SuperpoweredSimple.h:
 
 /Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/jni.h:
 
@@ -166,8 +171,6 @@
 /Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/memory.h:
 
 /Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/stdio.h:
-
-/Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/android/log.h:
 
 /Users/apple/Library/Android/sdk/ndk-bundle/platforms/android-9/arch-x86/usr/include/SLES/OpenSLES.h:
 

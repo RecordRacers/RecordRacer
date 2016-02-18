@@ -44,7 +44,7 @@ SuperpoweredExample::SuperpoweredExample(const char *path, int *params) : active
     roll = new SuperpoweredRoll(samplerate);
     filter = new SuperpoweredFilter(SuperpoweredFilter_Resonant_Lowpass, samplerate);
     flanger = new SuperpoweredFlanger(samplerate);
-
+    resampler = new SuperpoweredResampler();
     audioSystem = new SuperpoweredAndroidAudioIO(samplerate, buffersize, false, true, audioProcessing, this, -1, SL_ANDROID_STREAM_MEDIA, buffersize * 2);
 }
 
@@ -133,25 +133,18 @@ void SuperpoweredExample::onFxValue(int ivalue) {
     };
 }
 
+void SuperpoweredExample::onResamplerValue(int value){ ;
+    __android_log_print(ANDROID_LOG_VERBOSE, APP_NAME, "The parameter value is: %d", value);
+    unsigned int newSampleRate = (unsigned int)value * 500;
+    playerA->setSamplerate(newSampleRate);
+}
+
 bool SuperpoweredExample::process(short int *output, unsigned int numberOfSamples) {
-    pthread_mutex_lock(&mutex);
-
-    bool masterIsA = (crossValue <= 0.5f);
-    float masterBpm = masterIsA ? playerA->currentBpm : playerB->currentBpm;
-    double msElapsedSinceLastBeatA = playerA->msElapsedSinceLastBeat; // When playerB needs it, playerA has already stepped this value, so save it now.
-
+    float masterBpm = playerA->currentBpm;
     bool silence = !playerA->process(stereoBuffer, false, numberOfSamples, volA, masterBpm, playerB->msElapsedSinceLastBeat);
-    if (playerB->process(stereoBuffer, !silence, numberOfSamples, volB, masterBpm, msElapsedSinceLastBeatA)) silence = false;
 
-    roll->bpm = flanger->bpm = masterBpm; // Syncing fx is one line.
-
-    if (roll->process(silence ? NULL : stereoBuffer, stereoBuffer, numberOfSamples) && silence) silence = false;
     if (!silence) {
-        filter->process(stereoBuffer, stereoBuffer, numberOfSamples);
-        flanger->process(stereoBuffer, stereoBuffer, numberOfSamples);
     };
-
-    pthread_mutex_unlock(&mutex);
 
     // The stereoBuffer is ready now, let's put the finished audio into the requested buffers.
     if (!silence) SuperpoweredFloatToShortInt(stereoBuffer, output, numberOfSamples);
@@ -165,6 +158,7 @@ extern "C" {
 	JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onFxSelect(JNIEnv *javaEnvironment, jobject self, jint value);
 	JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onFxOff(JNIEnv *javaEnvironment, jobject self);
 	JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onFxValue(JNIEnv *javaEnvironment, jobject self, jint value);
+    JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onResamplerValue(JNIEnv *javaEnvironment, jobject self, jint value);
 }
 
 static SuperpoweredExample *example = NULL;
@@ -201,4 +195,8 @@ JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onFxOff(JNIEnv *javaEnviron
 
 JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onFxValue(JNIEnv *javaEnvironment, jobject self, jint value) {
 	example->onFxValue(value);
+}
+
+JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onResamplerValue(JNIEnv *javaEnvironment, jobject self, jint value) {
+	example->onResamplerValue(value);
 }
