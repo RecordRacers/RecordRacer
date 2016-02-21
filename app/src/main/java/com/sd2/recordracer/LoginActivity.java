@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ContentResolver;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
@@ -33,7 +34,9 @@ import java.util.List;
 /**
  * A login screen that offers login via email/password.
  */
-public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
+public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor>
+{
+    public final static String EMAIL_ADDRESS = "com.mycompany.myfirstapp.EMAIL_ADDRESS";
 
     /**
      * A dummy authentication store containing known user names and passwords.
@@ -78,6 +81,22 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             @Override
             public void onClick(View view) {
                 attemptLogin();
+            }
+        });
+
+        Button registerButton = (Button) findViewById(R.id.email_register_button);
+        registerButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                register();
+            }
+        });
+
+        Button forgotPasswordButton = (Button) findViewById(R.id.email_forgot_password_button);
+        forgotPasswordButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                forgotPassword();
             }
         });
 
@@ -333,5 +352,33 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
         }
     }
+
+    //TODO: fill in the methods below once db and authentication are up
+
+    /**
+     * Gets called when user clicks on the "Sign in" button
+     */
+    private void signIn() {
+        attemptLogin();
+    }
+
+    /**
+     * Gets called when user clicks on the "Register" button
+     */
+    private void register() {
+
+    }
+
+    /**
+     * Gets called when user clicks on the "Forgot Password?" button
+     */
+    private void forgotPassword() {
+        Intent intent = new Intent(this, ForgotPasswordActivity.class);
+        EditText editText = (EditText) findViewById(R.id.email);
+        String emailAddress = editText.getText().toString();
+        intent.putExtra(EMAIL_ADDRESS, emailAddress);
+        startActivity(intent);
+    }
+
 }
 
