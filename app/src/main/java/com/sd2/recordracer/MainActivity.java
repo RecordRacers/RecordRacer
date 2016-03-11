@@ -17,6 +17,7 @@ import android.widget.RadioGroup;
 import android.widget.Button;
 import android.view.View;
 
+// this activity is the main activity
 public class MainActivity extends AppCompatActivity {
     boolean playing = false;
 
@@ -64,8 +65,11 @@ public class MainActivity extends AppCompatActivity {
                 onCrossfader(progress);
             }
 
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
         });
 
         // fx fader events
@@ -85,11 +89,25 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // resampler fader events
+        final SeekBar rsfader = (SeekBar)findViewById(R.id.rsFader);
+        rsfader.setOnSeekBarChangeListener(new OnSeekBarChangeListener(){
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                onResamplerValue(progress);
+            }
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                onResamplerValue(seekBar.getProgress());
+            }
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                //
+            }
+        });
+
         // fx select event
         final RadioGroup group = (RadioGroup)findViewById(R.id.radioGroup1);
         group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             public void onCheckedChanged(RadioGroup radioGroup, int checkedId) {
-                RadioButton checkedRadioButton = (RadioButton)radioGroup.findViewById(checkedId);
+                RadioButton checkedRadioButton = (RadioButton) radioGroup.findViewById(checkedId);
                 onFxSelect(radioGroup.indexOfChild(checkedRadioButton));
             }
         });
@@ -130,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
     private native void onFxSelect(int value);
     private native void onFxOff();
     private native void onFxValue(int value);
+    private native void onResamplerValue(int value);
 
     static {
         System.loadLibrary("SuperpoweredExample");
