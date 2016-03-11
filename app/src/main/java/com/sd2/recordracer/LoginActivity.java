@@ -373,11 +373,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Gets called when user clicks on the "Forgot Password?" button
      */
     private void forgotPassword() {
-        Intent intent = new Intent(this, ForgotPasswordActivity.class);
-        EditText editText = (EditText) findViewById(R.id.email);
-        String emailAddress = editText.getText().toString();
-        intent.putExtra(EMAIL_ADDRESS, emailAddress);
-        startActivity(intent);
+        if (TextUtils.isEmpty(mEmailView.getText().toString())) {
+            //the e-mail field was empty so password cannot be reset
+            View focusView = null;
+            mEmailView.setError(getString(R.string.error_email_needed_to_reset_password));
+            focusView = mEmailView;
+            focusView.requestFocus();
+        } else {
+            Intent intent = new Intent(this, ForgotPasswordActivity.class);
+            EditText editText = (EditText) findViewById(R.id.email);
+            String emailAddress = editText.getText().toString();
+            intent.putExtra(EMAIL_ADDRESS, emailAddress);
+            startActivity(intent);
+        }
     }
 
 }
