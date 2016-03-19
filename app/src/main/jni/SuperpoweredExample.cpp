@@ -26,7 +26,7 @@ static bool audioProcessing(void *clientdata, short int *audioIO, int numberOfSa
 
 SuperpoweredExample::SuperpoweredExample(const char *path, int *params) : activeFx(0), crossValue(0.0f), volA(1.0f * headroom) {
     pthread_mutex_init(&mutex, NULL); // This will keep our player volumes and playback states in sync.
-    unsigned int samplerate = params[4], buffersize = params[5];
+    unsigned int samplerate = params[2], buffersize = params[3];
     stereoBuffer = (float *)memalign(16, (buffersize + 16) * sizeof(float) * 2);
 
     playerA = new SuperpoweredAdvancedAudioPlayer(&playerA , playerEventCallbackA, samplerate, 0);

@@ -2,6 +2,7 @@ package com.sd2.recordracer;
 
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,7 +12,10 @@ import android.view.MenuItem;
 import android.media.AudioManager;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +29,9 @@ import android.view.View;
 
 // this activity is the main activity
 public class MainActivity extends AppCompatActivity {
-    private List<String> songs = new ArrayList<String>();
+    private List<AssetFileDescriptor> songs = new ArrayList<AssetFileDescriptor>();
+    private List<String> songsURI = new ArrayList<String>();
+    private int currentSongIndex = 1;
     boolean playing = false;
 
     @Override
@@ -71,20 +77,26 @@ public class MainActivity extends AppCompatActivity {
 
     // Load all locally saved music to SuperPowered by passing in params
     public void initMusicAndSuperpowered(){
-
         // Define query that will fetch the music
         Cursor cursor = getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                MediaStore.Files.getContentUri("external"),
                 null,
-                null,
-                null,
-                MediaStore.Audio.Media.TITLE + " ASC");
+                MediaStore.Audio.Media.DATA + " like ? ",
+                new String[] {"%RecordRacer%"},
+                null);
 
         // Store song URIs to our global list
         while (cursor.moveToNext()) {
             String songURI = cursor.getString(cursor.getColumnIndex(android.provider.MediaStore.MediaColumns.DATA));
-            this.songs.add(songURI);
+            try{
+                this.songsURI.add(songURI);
+                this.songs.add(getContentResolver().openAssetFileDescriptor(Uri.parse("file://" + songURI), "r"));
+                Log.d("DEBUG",">>>>>SONGURI>>>>>"+songURI);
+            }catch(FileNotFoundException e){
+                Log.d("DEBUG",e.getMessage());
+            }
         }
+
 
         // Get the device's sample rate and buffer size to enable low-latency Android audio output, if available.
         String samplerateString = null, buffersizeString = null;
@@ -97,26 +109,23 @@ public class MainActivity extends AppCompatActivity {
         if (buffersizeString == null) buffersizeString = "512";
 
         // Files under res/raw are not compressed, just copied into the APK. Get the offset and length to know where our files are located.
-        AssetFileDescriptor fd0 = getResources().openRawResourceFd(R.raw.lycka), fd1 = getResources().openRawResourceFd(R.raw.nuyorica);
+        // AssetFileDescriptor fd0 = getResources().openRawResourceFd(R.raw.lycka), fd1 = getResources().openRawResourceFd(R.raw.nuyorica);
+
         long[] params = {
-                fd0.getStartOffset(),
-                fd0.getLength(),
-                fd1.getStartOffset(),
-                fd1.getLength(),
+                songs.get(currentSongIndex).getStartOffset(),
+                songs.get(currentSongIndex).getLength(),
                 Integer.parseInt(samplerateString),
                 Integer.parseInt(buffersizeString)
         };
         try {
-            fd0.getParcelFileDescriptor().close();
-            fd1.getParcelFileDescriptor().close();
+            songs.get(1).getParcelFileDescriptor().close();
+            songs.get(2).getParcelFileDescriptor().close();
         } catch (IOException e) {
             android.util.Log.d("", "Close error.");
         }
 
-
-        // Finnaly, pass all info to the NDK
-        // Arguments: path to the APK file, offset and length of the two resource files, sample rate, audio buffer size.
-        SuperpoweredExample(getPackageResourcePath(), params);
+        // Finally, pass the first song to the AdvancedAudioPlayer as you initialize it
+        SuperpoweredExample(songsURI.get(1), params);
 
     }
 
