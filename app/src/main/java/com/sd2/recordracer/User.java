@@ -2,6 +2,7 @@ package com.sd2.recordracer;
 
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -70,7 +71,7 @@ public class User {
     //list of all exercises
     List<Exercise> exercises;
 
-    private final String exercisesKey = "Exercises";
+    private static final String exercisesKey = "Exercises";
 
     public User(String username, String encryptedPassword, String email) {
         this.username = username;
@@ -94,6 +95,7 @@ public class User {
         fastestKilometerBiked=3600; //60 minutes by default
         totalMilesBiked = 0;
         totalRides=0;
+        exercises = new LinkedList<>();
 
 
     }
@@ -328,6 +330,9 @@ public class User {
         map.put(totalMilesBikedKey, Float.valueOf(totalMilesBiked));
         map.put(totalRidesKey,Integer.valueOf(totalRides));
 
+        //add exercises
+        map.put(exercisesKey, exercises);
+
         return map;
     }
 
@@ -396,6 +401,8 @@ public class User {
         Integer totalRides = (Integer) map.get(totalRidesKey);
         user.setTotalRides(totalRides.intValue());
 
+        user.setExercises((List)map.get(exercisesKey));
+
         return user;
     }
 
@@ -414,7 +421,8 @@ public class User {
                 map.containsKey(totalMilesRunKey) && map.containsKey(totalRunsKey) &&
                 map.containsKey(longestRideKey) && map.containsKey(fastestMileBikedKey) &&
                 map.containsKey(fastestKilometerBikedKey) && map.containsKey(fastest5kBikedKey) &&
-                map.containsKey(totalMilesBikedKey) && map.containsKey(totalRidesKey);
+                map.containsKey(totalMilesBikedKey) && map.containsKey(totalRidesKey) &&
+                map.containsKey(exercisesKey);
     }
 
 
