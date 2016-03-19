@@ -1,8 +1,8 @@
 package com.sd2.recordracer;
 
-import android.util.Log;
-
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Exercise {
 
@@ -27,16 +27,12 @@ public class Exercise {
      * @param date date and time of exercise
      */
     public Exercise(String type, float distance, int timeElapsed, int targetPace, int caloriesBurned, Date date) {
-        try {
-            if (type.equals("run")) {
-                exerciseType = ExerciseType.RUNNING;
-            } else if (type.equals("bike")) {
-                exerciseType = ExerciseType.BIKING;
-            } else {
-                throw new IllegalArgumentException("The exercise type must be either \"run\" or \"bike\"");
-            }
-        }catch (Exception e) {
-            Log.d(TAG, e + "\n Exercise saved without a type");
+        if (type.equals("run")) {
+            exerciseType = ExerciseType.RUNNING;
+        } else if (type.equals("bike")) {
+            exerciseType = ExerciseType.BIKING;
+        } else {
+            throw new IllegalArgumentException("The exercise type must be either \"run\" or \"bike\"");
         }
         this.distance=distance;
         this.timeElapsed=timeElapsed;
@@ -96,6 +92,48 @@ public class Exercise {
 
     private enum ExerciseType {
         RUNNING, BIKING
+    }
+
+    /**
+     * Takes all information in object and stores it in a Hashmap
+     * @return map for use with database
+     */
+    public Map<String, Object> objectToMap() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        if (exerciseType.compareTo(ExerciseType.RUNNING)==0) {
+            map.put("Type", "run");
+        } else {
+            map.put("Type", "bike");
+        }
+        map.put("Distance", Float.valueOf(distance));
+        map.put("Time Elapsed", Integer.valueOf(timeElapsed));
+        map.put("Target Pace", Integer.valueOf(targetPace));
+        map.put("Calories Burned", Integer.valueOf(caloriesBurned));
+        map.put("Date", date);
+        return map;
+    }
+
+    public static Exercise mapToObject(Map<String, Object> map) {
+        if (!mapIsValid(map)) {
+            throw new IllegalArgumentException("Map does not have all attributes necessary to create an exercise");
+        }
+        Float distance = (Float)map.get("Distance");
+        Integer timeElapsed = (Integer)map.get("Time Elapsed");
+        Integer targetPace = (Integer)map.get("Target Pace");
+        Integer caloriesBurned = (Integer)map.get("Calories Burned");
+        return new Exercise((String) map.get("Type"), distance.floatValue(), timeElapsed.intValue(),
+                targetPace.intValue(), caloriesBurned.intValue(), (Date) map.get("Date"));
+
+    }
+
+    private static boolean mapIsValid (Map<String, Object> map) {
+        return map.containsKey("Distance") && map.containsKey("Time Elapsed") && map.containsKey("Target Pace")
+                && map.containsKey("Calories Burned") && map.containsKey("Type");
+
+    }
+
+    public String toString() {
+        return objectToMap().toString();
     }
 
 }
