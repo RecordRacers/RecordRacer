@@ -126,11 +126,23 @@ void SuperpoweredExample::onResamplerValue(int value){ ;
     playerA->setSamplerate(newSampleRate);
 }
 
+void SuperpoweredExample::onPreviousSong() {
+    __android_log_print(ANDROID_LOG_VERBOSE, APP_NAME, "To previous song!");
+}
+
+void SuperpoweredExample::onNextSong() {
+    __android_log_print(ANDROID_LOG_VERBOSE, APP_NAME, "To next song!");
+}
+
+
 bool SuperpoweredExample::process(short int *output, unsigned int numberOfSamples) {
     float masterBpm = playerA->currentBpm;
     bool silence = !playerA->process(stereoBuffer, false, numberOfSamples, volA, masterBpm, playerA->msElapsedSinceLastBeat);
 
     if (!silence) {
+        flanger->process(stereoBuffer, stereoBuffer, numberOfSamples);
+        roll->process(stereoBuffer, stereoBuffer, numberOfSamples);
+        filter->process(stereoBuffer, stereoBuffer, numberOfSamples);
     };
 
     // The stereoBuffer is ready now, let's put the finished audio into the requested buffers.
@@ -146,6 +158,8 @@ extern "C" {
 	JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onFxOff(JNIEnv *javaEnvironment, jobject self);
 	JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onFxValue(JNIEnv *javaEnvironment, jobject self, jint value);
     JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onResamplerValue(JNIEnv *javaEnvironment, jobject self, jint value);
+    JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onPreviousSong(JNIEnv *javaEnvironment, jobject self);
+    JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onNextSong(JNIEnv *javaEnvironment, jobject self);
 }
 
 static SuperpoweredExample *example = NULL;
@@ -186,4 +200,12 @@ JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onFxValue(JNIEnv *javaEnvir
 
 JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onResamplerValue(JNIEnv *javaEnvironment, jobject self, jint value) {
 	example->onResamplerValue(value);
+}
+
+JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onPreviousSong(JNIEnv *javaEnvironment, jobject self) {
+    example->onPreviousSong();
+}
+
+JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onNextSong(JNIEnv *javaEnvironment, jobject self) {
+    example->onNextSong();
 }

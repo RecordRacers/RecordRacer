@@ -52,23 +52,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // fx fader events
-        final SeekBar fxfader = (SeekBar)findViewById(R.id.fxFader);
-        fxfader.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                onFxValue(progress);
-            }
-
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                onFxValue(seekBar.getProgress());
-            }
-
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                onFxOff();
-            }
-        });
-
         // resampler fader events
         final SeekBar rsfader = (SeekBar)findViewById(R.id.rsFader);
         rsfader.setOnSeekBarChangeListener(new OnSeekBarChangeListener(){
@@ -83,14 +66,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // fx select event
-        final RadioGroup group = (RadioGroup)findViewById(R.id.radioGroup1);
-        group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            public void onCheckedChanged(RadioGroup radioGroup, int checkedId) {
-                RadioButton checkedRadioButton = (RadioButton) radioGroup.findViewById(checkedId);
-                onFxSelect(radioGroup.indexOfChild(checkedRadioButton));
-            }
-        });
     }
 
 
@@ -152,6 +127,14 @@ public class MainActivity extends AppCompatActivity {
         b.setText(playing ? "Pause" : "Play");
     }
 
+    public void SuperpoweredExample_Previous(View button) {  // go to previous song in queue
+        onPreviousSong();
+    }
+
+    public void SuperpoweredExample_Next(View button) {  // go to next song in queue
+        onNextSong();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -181,6 +164,8 @@ public class MainActivity extends AppCompatActivity {
     private native void onFxOff();
     private native void onFxValue(int value);
     private native void onResamplerValue(int value);
+    private native void onNextSong();
+    private native void onPreviousSong();
 
     static {
         System.loadLibrary("SuperpoweredExample");
