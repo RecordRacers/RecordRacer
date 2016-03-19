@@ -60,4 +60,12 @@
         android:layout_below="@+id/radioGroup1"
         android:layout_marginTop="35dp" />
 
+    <SeekBar
+        android:id="@+id/rsFader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:layout_below="@+id/fxFader"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>
