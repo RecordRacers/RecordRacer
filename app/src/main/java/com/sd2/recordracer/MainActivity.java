@@ -1,5 +1,9 @@
 package com.sd2.recordracer;
 
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.content.IntentSender;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,7 +13,12 @@ import android.view.MenuItem;
 import android.media.AudioManager;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.os.Build;
 import android.widget.SeekBar;
@@ -39,10 +48,13 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 
 // this activity is the main activity
 public class MainActivity extends AppCompatActivity implements
-        ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
+            ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
+    private List<AssetFileDescriptor> songs = new ArrayList<AssetFileDescriptor>();
+    private List<String> songsURI = new ArrayList<String>();
+    private int currentSongIndex = 1;
+    private String samplerateString = null, buffersizeString = null;
 
     private GoogleApiClient mGoogleApiClient;
-
 
     boolean playing = false;
     float startTime;
@@ -180,88 +192,23 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Get the device's sample rate and buffer size to enable low-latency Android audio output, if available.
-        String samplerateString = null, buffersizeString = null;
-        if (Build.VERSION.SDK_INT >= 17) {
-            AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
-            samplerateString = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE);
-            buffersizeString = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
-        }
-        if (samplerateString == null) samplerateString = "44100";
-        if (buffersizeString == null) buffersizeString = "512";
+        // Fetch all locally stored music and initialize Superpowered app with it
+        initMusicAndSuperpowered();
 
-        // Files under res/raw are not compressed, just copied into the APK. Get the offset and length to know where our files are located.
-        AssetFileDescriptor fd0 = getResources().openRawResourceFd(R.raw.lycka), fd1 = getResources().openRawResourceFd(R.raw.nuyorica);
-        long[] params = {
-                fd0.getStartOffset(),
-                fd0.getLength(),
-                fd1.getStartOffset(),
-                fd1.getLength(),
-                Integer.parseInt(samplerateString),
-                Integer.parseInt(buffersizeString)
-        };
-        try {
-            fd0.getParcelFileDescriptor().close();
-            fd1.getParcelFileDescriptor().close();
-        } catch (IOException e) {
-            android.util.Log.d("", "Close error.");
-        }
-
-        // Arguments: path to the APK file, offset and length of the two resource files, sample rate, audio buffer size.
-        SuperpoweredExample(getPackageResourcePath(), params);
-
-        // crossfader events
-        final SeekBar crossfader = (SeekBar)findViewById(R.id.crossFader);
-        crossfader.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                onCrossfader(progress);
-            }
-
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
-
-        // fx fader events
-        final SeekBar fxfader = (SeekBar)findViewById(R.id.fxFader);
-        fxfader.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                onFxValue(progress);
-            }
-
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                onFxValue(seekBar.getProgress());
-            }
-
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                onFxOff();
-            }
-        });
 
         // resampler fader events
         final SeekBar rsfader = (SeekBar)findViewById(R.id.rsFader);
-        rsfader.setOnSeekBarChangeListener(new OnSeekBarChangeListener(){
+        rsfader.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 onResamplerValue(progress);
             }
+
             public void onStartTrackingTouch(SeekBar seekBar) {
                 onResamplerValue(seekBar.getProgress());
             }
+
             public void onStopTrackingTouch(SeekBar seekBar) {
                 //
-            }
-        });
-
-        // fx select event
-        final RadioGroup group = (RadioGroup)findViewById(R.id.radioGroup1);
-        group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            public void onCheckedChanged(RadioGroup radioGroup, int checkedId) {
-                RadioButton checkedRadioButton = (RadioButton) radioGroup.findViewById(checkedId);
-                onFxSelect(radioGroup.indexOfChild(checkedRadioButton));
             }
         });
 
@@ -312,7 +259,82 @@ public class MainActivity extends AppCompatActivity implements
                 }
             }
         });
+
     }
+
+
+    // Load all locally saved music to SuperPowered by passing in params
+    public void initMusicAndSuperpowered(){
+        // Define query that will fetch the music
+        Cursor cursor = getContentResolver().query(
+                MediaStore.Files.getContentUri("external"),
+                null,
+                MediaStore.Audio.Media.DATA + " like ? ",
+                new String[] {"%RecordRacer%"},
+                null);
+
+        // Store song URIs and File Descriptors to our global lists
+        while (cursor.moveToNext()) {
+            String songURI = cursor.getString(cursor.getColumnIndex(android.provider.MediaStore.MediaColumns.DATA));
+            try{
+                this.songsURI.add(songURI);
+                this.songs.add(getContentResolver().openAssetFileDescriptor(Uri.parse("file://" + songURI), "r"));
+                Log.d("DEBUG",">>>>>SONGURI>>>>>"+songURI);
+            }catch(FileNotFoundException e){
+                Log.d("DEBUG",e.getMessage());
+            }
+        }
+
+
+        // Get the device's sample rate and buffer size to enable low-latency Android audio output, if available.
+
+        if (Build.VERSION.SDK_INT >= 17) {
+            AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+            this.samplerateString = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE);
+            this.buffersizeString = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
+        }
+        if (this.samplerateString == null) this.samplerateString = "44100";
+        if (this.buffersizeString == null) this.buffersizeString = "512";
+
+        // Set up the first audio file as a parameter we can pass to NDK
+        long[] params = {
+                songs.get(this.currentSongIndex).getStartOffset(),
+                songs.get(this.currentSongIndex).getLength(),
+                Integer.parseInt(this.samplerateString),
+                Integer.parseInt(this.buffersizeString)
+        };
+        try {
+            // Close pipe after reading
+            songs.get(this.currentSongIndex).getParcelFileDescriptor().close();
+        } catch (IOException e) {
+            android.util.Log.d("", "Close error.");
+        }
+
+        // Finally, pass the first song to the AdvancedAudioPlayer as you initialize it
+        SuperpoweredExample(songsURI.get(this.currentSongIndex), params);
+
+    }
+
+    public void nextSong(View button){
+        Log.d("DEBUG","NEXT!");
+        if(this.currentSongIndex == songs.size()-1){
+            this.currentSongIndex = 1;
+        }else {
+            this.currentSongIndex++;
+        }
+        SuperpoweredExample_NewSong();
+    }
+
+    public void previousSong(View button) {
+        Log.d("DEBUG", "PREVIOUS!");
+        if (this.currentSongIndex == 1) {
+            this.currentSongIndex = songs.size() - 1;
+        } else {
+            this.currentSongIndex--;
+        }
+        SuperpoweredExample_NewSong();
+    }
+
 
     public void setMockLocation() {
 
@@ -340,8 +362,30 @@ public class MainActivity extends AppCompatActivity implements
             stopLocationUpdates();
         }
     }
+
+    public void SuperpoweredExample_NewSong() {  // go to next song in queue
+        // Set up the new audio file as a parameter we can pass to NDK
+        long[] params = {
+                songs.get(this.currentSongIndex).getStartOffset(),
+                songs.get(this.currentSongIndex).getLength(),
+                Integer.parseInt(this.samplerateString),
+                Integer.parseInt(this.buffersizeString)
+        };
+        try {
+            // Close pipe after reading
+            songs.get(this.currentSongIndex).getParcelFileDescriptor().close();
+        } catch (IOException e) {
+            android.util.Log.d("", "Close error.");
+        }
+
+        // Finally, pass the first song to the AdvancedAudioPlayer as you initialize it
+        onNewSong(songsURI.get(this.currentSongIndex), params);
+
+    }
+
             //1539 covered total distance
             //takes 297.9
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -371,6 +415,7 @@ public class MainActivity extends AppCompatActivity implements
     private native void onFxOff();
     private native void onFxValue(int value);
     private native void onResamplerValue(int value);
+    private native void onNewSong(String apkPath, long[] offsetAndLength);
 
     static {
         System.loadLibrary("SuperpoweredExample");
