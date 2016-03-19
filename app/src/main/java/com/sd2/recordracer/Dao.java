@@ -9,12 +9,12 @@ public interface Dao {
     /**
      * @return user with specified username if one exists. Null otherwise
      */
-    //public User getUserByUsername(String username);
+    public User getUserByUsername(String username);
 
     /**
      * @return user with specified email address if one exists. Null otherwise
      */
-    //public User getUserByEmail(String email);
+    public User getUserByEmail(String email);
 
 
 
