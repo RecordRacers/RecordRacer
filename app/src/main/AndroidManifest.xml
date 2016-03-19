@@ -42,6 +42,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.sd2.recordracer.LoginActivity" />
         </activity>
+        <activity android:name=".MainMenuActivity"
+                  android:label="Main Menu after Login"
+                  android:parentActivityName=".MainMenuActivity"
+                  android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="com.google.android.geo.API_KEY"
+                android:value="AIzaSyBr1WbUINW_Xmt5rBmBmCCvNBg-yHEuDBs">
+            </meta-data>
+        </activity>
     </application>
 
 </manifest>
