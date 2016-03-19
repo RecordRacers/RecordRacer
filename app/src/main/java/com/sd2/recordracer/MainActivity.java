@@ -1,13 +1,20 @@
 package com.sd2.recordracer;
 
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.media.AudioManager;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import android.os.Build;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -18,6 +25,7 @@ import android.view.View;
 
 // this activity is the main activity
 public class MainActivity extends AppCompatActivity {
+    private List<String> songs = new ArrayList<String>();
     boolean playing = false;
 
     @Override
@@ -25,35 +33,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Get the device's sample rate and buffer size to enable low-latency Android audio output, if available.
-        String samplerateString = null, buffersizeString = null;
-        if (Build.VERSION.SDK_INT >= 17) {
-            AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
-            samplerateString = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE);
-            buffersizeString = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
-        }
-        if (samplerateString == null) samplerateString = "44100";
-        if (buffersizeString == null) buffersizeString = "512";
+        // Fetch all locally stored music and initialize Superpowered app with it
+        initMusicAndSuperpowered();
 
-        // Files under res/raw are not compressed, just copied into the APK. Get the offset and length to know where our files are located.
-        AssetFileDescriptor fd0 = getResources().openRawResourceFd(R.raw.lycka), fd1 = getResources().openRawResourceFd(R.raw.nuyorica);
-        long[] params = {
-                fd0.getStartOffset(),
-                fd0.getLength(),
-                fd1.getStartOffset(),
-                fd1.getLength(),
-                Integer.parseInt(samplerateString),
-                Integer.parseInt(buffersizeString)
-        };
-        try {
-            fd0.getParcelFileDescriptor().close();
-            fd1.getParcelFileDescriptor().close();
-        } catch (IOException e) {
-            android.util.Log.d("", "Close error.");
-        }
-
-        // Arguments: path to the APK file, offset and length of the two resource files, sample rate, audio buffer size.
-        SuperpoweredExample(getPackageResourcePath(), params);
 
         // crossfader events
         final SeekBar crossfader = (SeekBar)findViewById(R.id.crossFader);
@@ -109,6 +91,58 @@ public class MainActivity extends AppCompatActivity {
                 onFxSelect(radioGroup.indexOfChild(checkedRadioButton));
             }
         });
+    }
+
+
+    // Load all locally saved music to SuperPowered by passing in params
+    public void initMusicAndSuperpowered(){
+
+        // Define query that will fetch the music
+        Cursor cursor = getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                null,
+                null,
+                null,
+                MediaStore.Audio.Media.TITLE + " ASC");
+
+        // Store song URIs to our global list
+        while (cursor.moveToNext()) {
+            String songURI = cursor.getString(cursor.getColumnIndex(android.provider.MediaStore.MediaColumns.DATA));
+            this.songs.add(songURI);
+        }
+
+        // Get the device's sample rate and buffer size to enable low-latency Android audio output, if available.
+        String samplerateString = null, buffersizeString = null;
+        if (Build.VERSION.SDK_INT >= 17) {
+            AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+            samplerateString = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE);
+            buffersizeString = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
+        }
+        if (samplerateString == null) samplerateString = "44100";
+        if (buffersizeString == null) buffersizeString = "512";
+
+        // Files under res/raw are not compressed, just copied into the APK. Get the offset and length to know where our files are located.
+        AssetFileDescriptor fd0 = getResources().openRawResourceFd(R.raw.lycka), fd1 = getResources().openRawResourceFd(R.raw.nuyorica);
+        long[] params = {
+                fd0.getStartOffset(),
+                fd0.getLength(),
+                fd1.getStartOffset(),
+                fd1.getLength(),
+                Integer.parseInt(samplerateString),
+                Integer.parseInt(buffersizeString)
+        };
+        try {
+            fd0.getParcelFileDescriptor().close();
+            fd1.getParcelFileDescriptor().close();
+        } catch (IOException e) {
+            android.util.Log.d("", "Close error.");
+        }
+
+
+        // Finnaly, pass all info to the NDK
+        // Arguments: path to the APK file, offset and length of the two resource files, sample rate, audio buffer size.
+        SuperpoweredExample(getPackageResourcePath(), params);
+
     }
 
     public void SuperpoweredExample_PlayPause(View button) {  // Play/pause.
