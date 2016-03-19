@@ -126,12 +126,14 @@ void SuperpoweredExample::onResamplerValue(int value){ ;
     playerA->setSamplerate(newSampleRate);
 }
 
-void SuperpoweredExample::onPreviousSong() {
-    __android_log_print(ANDROID_LOG_VERBOSE, APP_NAME, "To previous song!");
-}
-
-void SuperpoweredExample::onNextSong() {
-    __android_log_print(ANDROID_LOG_VERBOSE, APP_NAME, "To next song!");
+void SuperpoweredExample::onNewSong(const char *path, int *params) {
+    __android_log_print(ANDROID_LOG_VERBOSE, APP_NAME, "To new song!");
+    playerA->open(path, params[0], params[1]);
+    playerA->syncMode = SuperpoweredAdvancedAudioPlayerSyncMode_TempoAndBeat;
+    pthread_mutex_lock(&mutex);
+    bool masterIsA = (crossValue <= 0.5f);
+    playerA->play(!masterIsA);
+    pthread_mutex_unlock(&mutex);
 }
 
 
@@ -158,8 +160,7 @@ extern "C" {
 	JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onFxOff(JNIEnv *javaEnvironment, jobject self);
 	JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onFxValue(JNIEnv *javaEnvironment, jobject self, jint value);
     JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onResamplerValue(JNIEnv *javaEnvironment, jobject self, jint value);
-    JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onPreviousSong(JNIEnv *javaEnvironment, jobject self);
-    JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onNextSong(JNIEnv *javaEnvironment, jobject self);
+    JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onNewSong(JNIEnv *javaEnvironment, jobject self, jstring apkPath, jlongArray offsetAndLength);
 }
 
 static SuperpoweredExample *example = NULL;
@@ -168,8 +169,8 @@ static SuperpoweredExample *example = NULL;
 JNIEXPORT void Java_com_sd2_recordracer_MainActivity_SuperpoweredExample(JNIEnv *javaEnvironment, jobject self, jstring apkPath, jlongArray params) {
 	// Convert the input jlong array to a regular int array.
     jlong *longParams = javaEnvironment->GetLongArrayElements(params, JNI_FALSE);
-    int arr[6];
-    for (int n = 0; n < 6; n++) arr[n] = longParams[n];
+    int arr[4];
+    for (int n = 0; n < 4; n++) arr[n] = longParams[n];
     javaEnvironment->ReleaseLongArrayElements(params, longParams, JNI_ABORT);
 
     const char *path = javaEnvironment->GetStringUTFChars(apkPath, JNI_FALSE);
@@ -202,10 +203,14 @@ JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onResamplerValue(JNIEnv *ja
 	example->onResamplerValue(value);
 }
 
-JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onPreviousSong(JNIEnv *javaEnvironment, jobject self) {
-    example->onPreviousSong();
-}
+JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onNewSong(JNIEnv *javaEnvironment, jobject self, jstring apkPath, jlongArray params) {
+    // Convert the input jlong array to a regular int array.
+    jlong *longParams = javaEnvironment->GetLongArrayElements(params, JNI_FALSE);
+    int arr[4];
+    for (int n = 0; n < 4; n++) arr[n] = longParams[n];
+    javaEnvironment->ReleaseLongArrayElements(params, longParams, JNI_ABORT);
 
-JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onNextSong(JNIEnv *javaEnvironment, jobject self) {
-    example->onNextSong();
+    const char *path = javaEnvironment->GetStringUTFChars(apkPath, JNI_FALSE);
+    example->onNewSong(path, arr);
+    javaEnvironment->ReleaseStringUTFChars(apkPath, path);
 }

@@ -32,8 +32,7 @@ public:
 	void onFxOff();
 	void onFxValue(int value);
 	void onResamplerValue(int value);
-    void onPreviousSong();
-    void onNextSong();
+    void onNewSong(const char *path, int *params);
 
 
 

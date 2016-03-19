@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private List<AssetFileDescriptor> songs = new ArrayList<AssetFileDescriptor>();
     private List<String> songsURI = new ArrayList<String>();
     private int currentSongIndex = 1;
+    private String samplerateString = null, buffersizeString = null;
     boolean playing = false;
 
     @Override
@@ -60,13 +61,15 @@ public class MainActivity extends AppCompatActivity {
 
         // resampler fader events
         final SeekBar rsfader = (SeekBar)findViewById(R.id.rsFader);
-        rsfader.setOnSeekBarChangeListener(new OnSeekBarChangeListener(){
+        rsfader.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 onResamplerValue(progress);
             }
+
             public void onStartTrackingTouch(SeekBar seekBar) {
                 onResamplerValue(seekBar.getProgress());
             }
+
             public void onStopTrackingTouch(SeekBar seekBar) {
                 //
             }
@@ -85,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
                 new String[] {"%RecordRacer%"},
                 null);
 
-        // Store song URIs to our global list
+        // Store song URIs and File Descriptors to our global lists
         while (cursor.moveToNext()) {
             String songURI = cursor.getString(cursor.getColumnIndex(android.provider.MediaStore.MediaColumns.DATA));
             try{
@@ -99,34 +102,52 @@ public class MainActivity extends AppCompatActivity {
 
 
         // Get the device's sample rate and buffer size to enable low-latency Android audio output, if available.
-        String samplerateString = null, buffersizeString = null;
+
         if (Build.VERSION.SDK_INT >= 17) {
             AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
-            samplerateString = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE);
-            buffersizeString = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
+            this.samplerateString = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE);
+            this.buffersizeString = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
         }
-        if (samplerateString == null) samplerateString = "44100";
-        if (buffersizeString == null) buffersizeString = "512";
+        if (this.samplerateString == null) this.samplerateString = "44100";
+        if (this.buffersizeString == null) this.buffersizeString = "512";
 
-        // Files under res/raw are not compressed, just copied into the APK. Get the offset and length to know where our files are located.
-        // AssetFileDescriptor fd0 = getResources().openRawResourceFd(R.raw.lycka), fd1 = getResources().openRawResourceFd(R.raw.nuyorica);
-
+        // Set up the first audio file as a parameter we can pass to NDK
         long[] params = {
-                songs.get(currentSongIndex).getStartOffset(),
-                songs.get(currentSongIndex).getLength(),
-                Integer.parseInt(samplerateString),
-                Integer.parseInt(buffersizeString)
+                songs.get(this.currentSongIndex).getStartOffset(),
+                songs.get(this.currentSongIndex).getLength(),
+                Integer.parseInt(this.samplerateString),
+                Integer.parseInt(this.buffersizeString)
         };
         try {
-            songs.get(1).getParcelFileDescriptor().close();
-            songs.get(2).getParcelFileDescriptor().close();
+            // Close pipe after reading
+            songs.get(this.currentSongIndex).getParcelFileDescriptor().close();
         } catch (IOException e) {
             android.util.Log.d("", "Close error.");
         }
 
         // Finally, pass the first song to the AdvancedAudioPlayer as you initialize it
-        SuperpoweredExample(songsURI.get(1), params);
+        SuperpoweredExample(songsURI.get(this.currentSongIndex), params);
 
+    }
+
+    public void nextSong(View button){
+        Log.d("DEBUG","NEXT!");
+        if(this.currentSongIndex == songs.size()-1){
+            this.currentSongIndex = 1;
+        }else {
+            this.currentSongIndex++;
+        }
+        SuperpoweredExample_NewSong();
+    }
+
+    public void previousSong(View button){
+        Log.d("DEBUG","PREVIOUS!");
+        if(this.currentSongIndex == 1){
+            this.currentSongIndex = songs.size()-1;
+        }else {
+            this.currentSongIndex--;
+        }
+        SuperpoweredExample_NewSong();
     }
 
     public void SuperpoweredExample_PlayPause(View button) {  // Play/pause.
@@ -136,12 +157,24 @@ public class MainActivity extends AppCompatActivity {
         b.setText(playing ? "Pause" : "Play");
     }
 
-    public void SuperpoweredExample_Previous(View button) {  // go to previous song in queue
-        onPreviousSong();
-    }
+    public void SuperpoweredExample_NewSong() {  // go to next song in queue
+        // Set up the new audio file as a parameter we can pass to NDK
+        long[] params = {
+                songs.get(this.currentSongIndex).getStartOffset(),
+                songs.get(this.currentSongIndex).getLength(),
+                Integer.parseInt(this.samplerateString),
+                Integer.parseInt(this.buffersizeString)
+        };
+        try {
+            // Close pipe after reading
+            songs.get(this.currentSongIndex).getParcelFileDescriptor().close();
+        } catch (IOException e) {
+            android.util.Log.d("", "Close error.");
+        }
 
-    public void SuperpoweredExample_Next(View button) {  // go to next song in queue
-        onNextSong();
+        // Finally, pass the first song to the AdvancedAudioPlayer as you initialize it
+        onNewSong(songsURI.get(this.currentSongIndex), params);
+
     }
 
     @Override
@@ -173,8 +206,7 @@ public class MainActivity extends AppCompatActivity {
     private native void onFxOff();
     private native void onFxValue(int value);
     private native void onResamplerValue(int value);
-    private native void onNextSong();
-    private native void onPreviousSong();
+    private native void onNewSong(String apkPath, long[] offsetAndLength);
 
     static {
         System.loadLibrary("SuperpoweredExample");

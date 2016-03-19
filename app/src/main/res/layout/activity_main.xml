@@ -39,7 +39,7 @@
         android:id="@+id/previousBtn"
         android:layout_toLeftOf="@+id/playPause"
         android:layout_above="@+id/crossFader"
-        android:onClick="SuperpoweredExample_Previous"
+        android:onClick="previousSong"
         android:nestedScrollingEnabled="true" />
 
     <Button
@@ -51,6 +51,6 @@
         android:layout_alignBottom="@+id/playPause"
         android:layout_toRightOf="@+id/playPause"
         android:layout_toEndOf="@+id/playPause"
-        android:onClick="SuperpoweredExample_Next" />
+        android:onClick="nextSong" />
 
 </RelativeLayout>
