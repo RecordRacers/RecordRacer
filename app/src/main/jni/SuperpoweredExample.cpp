@@ -122,7 +122,7 @@ void SuperpoweredExample::onFxValue(int ivalue) {
 
 void SuperpoweredExample::onResamplerValue(int value){ ;
     __android_log_print(ANDROID_LOG_VERBOSE, APP_NAME, "The parameter value is: %d", value);
-    unsigned int newSampleRate = (unsigned int)value * 500;
+    unsigned int newSampleRate = (unsigned int)value;
     playerA->setSamplerate(newSampleRate);
 }
 
