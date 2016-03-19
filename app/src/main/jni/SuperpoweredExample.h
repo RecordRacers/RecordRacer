@@ -38,14 +38,14 @@ public:
 private:
     pthread_mutex_t mutex;
     SuperpoweredAndroidAudioIO *audioSystem;
-    SuperpoweredAdvancedAudioPlayer *playerA, *playerB;
+    SuperpoweredAdvancedAudioPlayer *playerA;
     SuperpoweredRoll *roll;
     SuperpoweredFilter *filter;
     SuperpoweredFlanger *flanger;
     SuperpoweredResampler *resampler;
     float *stereoBuffer;
     unsigned char activeFx;
-    float crossValue, volA, volB;
+    float crossValue, volA;
 };
 
 #endif
