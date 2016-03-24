@@ -2,6 +2,7 @@ package com.sd2.recordracer;
 
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.content.IntentSender;
@@ -63,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements
     float timeGoal;
     float expectedRate;
     float currDistanceCovered;
+    float prevTime = 0.0f;
+    float sampleTime;
 
     float currPercent;
     float expectedPercent;
@@ -110,18 +113,28 @@ public class MainActivity extends AppCompatActivity implements
 
         prevLocation = mCurrentLocation;
         if(prevLocation != null) {
+
             mCurrentLocation = location;
+            currTime = (System.nanoTime() - startTime) / 1000000000.0f; //s
+            Log.d("Time", "Current time is " + currTime);
             tempDistance = (long) prevLocation.distanceTo(mCurrentLocation);
+
+            Log.d("DEBUG",String.format("%.2f",(tempDistance/(currTime - prevTime))));
+//            if ((tempDistance/(currTime - prevTime))>12.4f){
+//                prevTime = currTime;
+//                return;
+//            };
+            Log.d("DEBUG",mCurrentLocation.toString());
             currDistanceCovered += tempDistance;
 
             Log.d("currDistanceCovered", "currDistanceCovered = " + String.format("%.2f", currDistanceCovered));
 
             if(currDistanceCovered >= totalDistance) {
                 stopLocationUpdates();
+                SuperpoweredExample_PlayPause((Button)findViewById(R.id.playPause));
                 return;
             }
-            currTime = (System.nanoTime() - startTime) / 1000000000.0f; //s
-            Log.d("Time", "Current time is " + currTime);
+
 
             Log.d("expectedRate", "expectedRate = " + String.format("%.5f", expectedRate));
             Log.d("totalDistance", "totalDistance = " + String.format("%.5f", totalDistance));
@@ -133,12 +146,12 @@ public class MainActivity extends AppCompatActivity implements
             Log.d("currPercent", "currPercent = " + String.format("%.5f", currPercent));
 
             if(currPercent > expectedPercent) { //lower freq, speed up
-                newSampleRate = optimalSampleRate - ((currPercent - expectedPercent) * optimalSampleRate * 10);
+                newSampleRate = optimalSampleRate - ((currPercent - expectedPercent) * optimalSampleRate );
             } else {
-                newSampleRate = optimalSampleRate + ((expectedPercent - currPercent) * optimalSampleRate * 10);
+                newSampleRate = optimalSampleRate + ((expectedPercent - currPercent) * optimalSampleRate );
             }
             Log.d("newSample", "newSample = " + newSampleRate);
-
+            prevTime = currTime;
             onResamplerValue((int) newSampleRate);
         }
 
@@ -157,6 +170,12 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     protected void startLocationUpdates() {
+//        AsyncTask.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                //TODO your background code
+//            }
+//        });
         LocationServices.FusedLocationApi.requestLocationUpdates(
                 mGoogleApiClient, mLocationRequest, (LocationListener) this);
     }
