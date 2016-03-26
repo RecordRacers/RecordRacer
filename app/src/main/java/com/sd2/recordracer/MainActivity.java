@@ -106,6 +106,8 @@ public class MainActivity extends AppCompatActivity implements
 
             if(currDistanceCovered >= totalDistance) {
                 stopLocationUpdates();
+                //stop song
+                SuperpoweredExample_PlayPause((Button) findViewById(R.id.playPause));
                 return;
             }
             currTime = (System.nanoTime() - startTime) / 1000000000.0f; //s
@@ -121,9 +123,9 @@ public class MainActivity extends AppCompatActivity implements
             Log.d("currPercent", "currPercent = " + String.format("%.5f", currPercent));
 
             if(currPercent > expectedPercent) { //lower freq, speed up
-                newSampleRate = optimalSampleRate - ((currPercent - expectedPercent) * optimalSampleRate * 10);
+                newSampleRate = optimalSampleRate - ((currPercent - expectedPercent) * optimalSampleRate);
             } else {
-                newSampleRate = optimalSampleRate + ((expectedPercent - currPercent) * optimalSampleRate * 10);
+                newSampleRate = optimalSampleRate + ((expectedPercent - currPercent) * optimalSampleRate);
             }
             Log.d("newSample", "newSample = " + newSampleRate);
 
@@ -330,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements
 
             //set start time, distance, and time goals
             startTime = System.nanoTime();
-            totalDistance = 1538.0f; //meters
+            totalDistance = 200.0f; //meters 1538 to test deceleration slowly
             timeGoal = 400.0f; //1 sec
             expectedRate =  totalDistance / timeGoal;
             currDistanceCovered = 0;
