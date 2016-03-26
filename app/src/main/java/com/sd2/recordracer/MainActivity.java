@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements
     private GoogleApiClient mGoogleApiClient;
 
     boolean playing = false;
+    boolean shortTermGoal = false;
     float startTime;
     float currTime ;
     float totalDistance;
@@ -89,6 +90,11 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
+
+    /*
+    LOCATION-BASED ALGORITHM
+        on location changes
+    */
     @Override
     public void onLocationChanged(Location location) {
         //sample current location in android, have distance goal variable
@@ -212,8 +218,8 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
 
         // Fetch all locally stored music and initialize Superpowered app with it
-        initMusicAndSuperpowered();
-
+        //initMusicAndSuperpowered();
+        initEmulatorMusicAndSuperpowered();
 
         // resampler fader events
         final SeekBar rsfader = (SeekBar)findViewById(R.id.rsFader);
@@ -333,6 +339,34 @@ public class MainActivity extends AppCompatActivity implements
         SuperpoweredExample(songsURI.get(this.currentSongIndex), params);
 
     }
+
+    // Load all locally saved music to SuperPowered by passing in params
+    public void initEmulatorMusicAndSuperpowered(){
+        // Get the device's sample rate and buffer size to enable low-latency Android audio output, if available.
+
+        if (Build.VERSION.SDK_INT >= 17) {
+            AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+            this.samplerateString = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE);
+            this.buffersizeString = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
+        }
+        if (this.samplerateString == null) this.samplerateString = "44100";
+        if (this.buffersizeString == null) this.buffersizeString = "512";
+
+
+        AssetFileDescriptor fd = getResources().openRawResourceFd(R.raw.lycka);
+        // Set up test audio file as a parameter we can pass to NDK
+        long[] params = {
+                fd.getStartOffset(),
+                fd.getLength(),
+                Integer.parseInt(this.samplerateString),
+                Integer.parseInt(this.buffersizeString)
+        };
+
+        // Finally, pass the first song to the AdvancedAudioPlayer as you initialize it
+        SuperpoweredExample(getPackageResourcePath(), params);
+
+    }
+
 
     public void nextSong(View button){
         Log.d("DEBUG","NEXT!");
