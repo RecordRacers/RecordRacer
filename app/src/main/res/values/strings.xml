@@ -28,4 +28,23 @@
         <item>Biking</item>
         <item>Swimming</item>
     </string-array>
+
+    <string-array name="spinner_playlist">
+
+    </string-array>
+
+    <string-array name="velocity_units">
+        <item>mi/hr</item>
+        <item>kil/hr</item>
+    </string-array>
+
+    <!-- Strings related to account creation -->
+    <string-array name="height_unit" >
+        <item>inches</item>
+        <item>centimeters</item>
+    </string-array>
+    <string-array name="weight_unit" >
+        <item>pounds</item>
+        <item>kilograms</item>
+    </string-array>
 </resources>
