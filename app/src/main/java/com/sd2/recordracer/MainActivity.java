@@ -58,10 +58,13 @@ public class MainActivity extends AppCompatActivity implements
     private GoogleApiClient mGoogleApiClient;
 
     boolean playing = false;
-    boolean shortTermGoal = false;
+    boolean smartPacing = true;
     float startTime;
     float currTime ;
     float totalDistance;
+    float startupDistance;
+    float pacingDistance = 5.0f;       // 1 mile for optimal smart pacing
+    float pacingWindowCount = 0;
     float timeGoal;
     float expectedRate;
     float currDistanceCovered;
@@ -70,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements
 
     float currPercent;
     float expectedPercent;
+    float expectedDistance;
     float newSampleRate;
 
     //set prev point
@@ -115,54 +119,135 @@ public class MainActivity extends AppCompatActivity implements
 
         //update everything,
 
-        //set mock location
-
         prevLocation = mCurrentLocation;
         if(prevLocation != null) {
 
             mCurrentLocation = location;
             currTime = (System.nanoTime() - startTime) / 1000000000.0f; //s
-            Log.d("Time", "Current time is " + currTime);
+            // Log.d("Time", "Current time is " + currTime);
             tempDistance = (long) prevLocation.distanceTo(mCurrentLocation);
 
-            Log.d("DEBUG",String.format("%.2f",(tempDistance/(currTime - prevTime))));
+            if(tempDistance > 5.0f){
+                // Ignore anomalies
+                tempDistance = 0.0f;
+            }
+            // Log.d("DEBUG",String.format("%.2f",(tempDistance/(currTime - prevTime))));
 //            if ((tempDistance/(currTime - prevTime))>12.4f){
 //                prevTime = currTime;
 //                return;
 //            };
-            Log.d("DEBUG",mCurrentLocation.toString());
             currDistanceCovered += tempDistance;
 
-            Log.d("currDistanceCovered", "currDistanceCovered = " + String.format("%.2f", currDistanceCovered));
+//            //Log.d("DEBUG",mCurrentLocation.toString());
+            //Log.d("distanceSinceLast", "distanceSinceLast = " + String.format("%.2f", tempDistance));
+            //Log.d("currDistanceCovered", "currDistanceCovered = " + String.format("%.2f", currDistanceCovered));
 
-            if(currDistanceCovered >= totalDistance) {
-                stopLocationUpdates();
-                SuperpoweredExample_PlayPause((Button)findViewById(R.id.playPause));
-                return;
+            if(!smartPacing){
+                // This means the user is trying to accomplish a specific goal
+
+                // Has the user covered goal distance? if so, stop work out.
+                if(currDistanceCovered >= totalDistance) {
+                    stopLocationUpdates();
+                    SuperpoweredExample_PlayPause((Button)findViewById(R.id.playPause));
+                    return;
+                }
+
+                // Workout continues!
+                Log.d("expectedRate", "expectedRate = " + String.format("%.5f", expectedRate));
+                Log.d("totalDistance", "totalDistance = " + String.format("%.5f", totalDistance));
+
+                // What percent distance would be covered if you've been running at the ideal
+                // constant pace the entire time?
+                expectedPercent = (expectedRate * currTime / totalDistance);
+                Log.d("expectedPercent", "expectedPercent = " + String.format("%.5f", expectedPercent));
+
+                // What percent distance was actually covered thus far?
+                currPercent = (currDistanceCovered / totalDistance);
+                Log.d("currPercent", "currPercent = " + String.format("%.5f", currPercent));
+
+                if(currPercent > expectedPercent) { //lower freq, speed up
+                    newSampleRate = optimalSampleRate - ((currPercent - expectedPercent) * optimalSampleRate );
+                } else {
+                    newSampleRate = optimalSampleRate + ((expectedPercent - currPercent) * optimalSampleRate );
+                }
+                Log.d("newSample", "newSample = " + newSampleRate);
+                prevTime = currTime;
+                onResamplerValue((int) newSampleRate);
+
+            }else{
+                // In this case, the user doesn't care about total distance or time but on general pacing
+                // within a window of time.
+
+                if(currTime < 15.0f){
+                    // Avoid setting expected rate for now
+                    if(currTime < 5.0f){
+                        // During the first 5 seconds, ramp up sampling rate to 44.1kHz
+                        float percentOfSpeedupComplete = currTime / 5.0f;
+
+                        newSampleRate = 94100.0f - (50000.0f*percentOfSpeedupComplete);
+                        onResamplerValue((int)newSampleRate);
+                        Log.d("DEBUG", "SAMPLE RATE RAMPING DOWN: "+newSampleRate);
+                    }else{
+                        Log.d("DEBUG","SAMPLING RATE SHOULD NOW BE CONSTANT");
+                    }
+                }else{
+                    // If goal pace has not yet been established
+                    // it must be calculated now
+                    if(expectedRate == 0.0f){
+                        startupDistance = currDistanceCovered;
+                        expectedRate = currDistanceCovered / currTime;      // average pace thus far
+                        Log.d("DEBUG","INITIAL RATE SET TO: "+expectedRate);
+                    }else{
+                        // Only update goal pace upon reaching new pacing window
+                        if(nextPacingWindow()){
+                            // Running average as a goal
+                            if(currDistanceCovered-startupDistance < 0.0f){
+                                expectedRate = 0.0f;
+                            }else{
+                                expectedRate = (currDistanceCovered) / (currTime);
+                            }
+                            Log.d("DEBUG","NEXT WINDOW, UPDATED GOAL RATE: "+expectedRate);
+                            // Expand window (the initial acceleration will have least weight)
+                            // pacingDistance = 1.02f * pacingDistance;
+                        }
+                    }
+                    // Adjust / report workout after smart-pacing calculations
+                    Log.d("expectedRate", "expectedRate = " + String.format("%.5f", expectedRate));
+                    Log.d("Distance Covered", "Distance Covered = " + String.format("%.5f", currDistanceCovered));
+
+                    expectedDistance = expectedRate * currTime;
+                    Log.d("expectedDistance", "expectedDistance = " + String.format("%.5f", expectedDistance));
+
+                    if(currDistanceCovered > expectedDistance) { //lower freq, speed up
+                        newSampleRate = optimalSampleRate - (((currDistanceCovered - expectedDistance)/currDistanceCovered) * optimalSampleRate );
+                    } else {
+                        newSampleRate = optimalSampleRate + (((expectedDistance - currDistanceCovered)/expectedDistance) * optimalSampleRate );
+                    }
+                    Log.d("newSample", "newSample = " + newSampleRate);
+                    prevTime = currTime;
+                    onResamplerValue((int) newSampleRate);
+                }
             }
 
 
-            Log.d("expectedRate", "expectedRate = " + String.format("%.5f", expectedRate));
-            Log.d("totalDistance", "totalDistance = " + String.format("%.5f", totalDistance));
-
-            expectedPercent = (expectedRate * currTime / totalDistance);
-            Log.d("expectedPercent", "expectedPercent = " + String.format("%.5f", expectedPercent));
-
-            currPercent = (currDistanceCovered / totalDistance);
-            Log.d("currPercent", "currPercent = " + String.format("%.5f", currPercent));
-
-            if(currPercent > expectedPercent) { //lower freq, speed up
-                newSampleRate = optimalSampleRate - ((currPercent - expectedPercent) * optimalSampleRate );
-            } else {
-                newSampleRate = optimalSampleRate + ((expectedPercent - currPercent) * optimalSampleRate );
-            }
-            Log.d("newSample", "newSample = " + newSampleRate);
-            prevTime = currTime;
-            onResamplerValue((int) newSampleRate);
         }
 
 
     }
+
+    public boolean nextPacingWindow(){
+        //
+        int currWindow = (int)(currDistanceCovered / pacingDistance);
+        pacingDistance = pacingDistance * (1.005f);
+        if( currWindow > pacingWindowCount ) {
+            Log.d("currWindow", " currWindow = " + currWindow);
+            pacingWindowCount = currWindow;
+            return true;
+        }else{
+            return false;
+        }
+    }
+
 
     @Override
     public void onConnected(Bundle connectionHint) {
@@ -182,8 +267,7 @@ public class MainActivity extends AppCompatActivity implements
 //                //TODO your background code
 //            }
 //        });
-        LocationServices.FusedLocationApi.requestLocationUpdates(
-                mGoogleApiClient, mLocationRequest, (LocationListener) this);
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, (LocationListener) this);
     }
 
     protected void onPause() {
@@ -191,8 +275,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     protected void stopLocationUpdates() {
-        LocationServices.FusedLocationApi.removeLocationUpdates(
-                mGoogleApiClient, this);
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
     }
 
     protected void createLocationRequest() {
@@ -222,20 +305,20 @@ public class MainActivity extends AppCompatActivity implements
         initEmulatorMusicAndSuperpowered();
 
         // resampler fader events
-        final SeekBar rsfader = (SeekBar)findViewById(R.id.rsFader);
-        rsfader.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                onResamplerValue(progress);
-            }
-
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                onResamplerValue(seekBar.getProgress());
-            }
-
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                //
-            }
-        });
+//        final SeekBar rsfader = (SeekBar)findViewById(R.id.rsFader);
+//        rsfader.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+//                onResamplerValue(progress);
+//            }
+//
+//            public void onStartTrackingTouch(SeekBar seekBar) {
+//                onResamplerValue(seekBar.getProgress());
+//            }
+//
+//            public void onStopTrackingTouch(SeekBar seekBar) {
+//                //
+//            }
+//        });
 
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
@@ -245,8 +328,6 @@ public class MainActivity extends AppCompatActivity implements
                     .addApi(LocationServices.API)
                     .build();
         }
-
-        setMockLocation();
 
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(mLocationRequest);
@@ -353,7 +434,7 @@ public class MainActivity extends AppCompatActivity implements
         if (this.buffersizeString == null) this.buffersizeString = "512";
 
 
-        AssetFileDescriptor fd = getResources().openRawResourceFd(R.raw.lycka);
+        AssetFileDescriptor fd = getResources().openRawResourceFd(R.raw.nuyorica);
         // Set up test audio file as a parameter we can pass to NDK
         long[] params = {
                 fd.getStartOffset(),
@@ -389,13 +470,9 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    public void setMockLocation() {
-
-    }
-
     public void SuperpoweredExample_PlayPause(View button) {  // Play/pause.
         playing = !playing;
-        onPlayPause(playing);
+
         Button b = (Button) findViewById(R.id.playPause);
         b.setText(playing ? "Pause" : "Play");
         if(playing) {
@@ -405,15 +482,29 @@ public class MainActivity extends AppCompatActivity implements
 
             //set start time, distance, and time goals
             startTime = System.nanoTime();
-            totalDistance = 1538.0f; //meters
-            timeGoal = 400.0f; //1 sec
-            expectedRate =  totalDistance / timeGoal;
+
+            // Depending on workout mode, set starting variables
+            if(!smartPacing) {
+                // calculate expected rate
+                totalDistance = 1538.0f; //meters
+                timeGoal = 400.0f; //1 sec
+                expectedRate = totalDistance / timeGoal;
+             }else{
+                // we need to wait before setting rate
+                expectedRate = 0.0f;
+                pacingWindowCount = 0;
+
+            }
+
             currDistanceCovered = 0;
 
             startLocationUpdates();
         } else { //false
             stopLocationUpdates();
         }
+
+
+        onPlayPause(playing);
     }
 
     public void SuperpoweredExample_NewSong() {  // go to next song in queue

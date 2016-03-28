@@ -121,9 +121,11 @@ void SuperpoweredExample::onFxValue(int ivalue) {
 }
 
 void SuperpoweredExample::onResamplerValue(int value){ ;
+    pthread_mutex_lock(&mutex);
     __android_log_print(ANDROID_LOG_VERBOSE, APP_NAME, "The parameter value is: %d", value);
     unsigned int newSampleRate = (unsigned int)value;
     playerA->setSamplerate(newSampleRate);
+    pthread_mutex_unlock(&mutex);
 }
 
 void SuperpoweredExample::onNewSong(const char *path, int *params) {

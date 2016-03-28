@@ -25,7 +25,7 @@ public class AndroidTelnet {
     static int[] fullDeceleration = new int[] {50,75,100,125,150,175,200,225,250,275,300,325,350,400,450,500,600,800};
 
 	//// How long is the run?
-	static final int NUMBER_OF_POINTS = fullAcceleration.length + 500 + fullDeceleration.length;
+	static final int NUMBER_OF_POINTS = fullAcceleration.length + 1000 + fullDeceleration.length;
     
     public static void main(String[] args) {
     	
@@ -49,6 +49,9 @@ public class AndroidTelnet {
             PrintStream out = new PrintStream(socket.getOutputStream());
             float longitude = START_LONGITUDE, latitude = START_LATITUDE;
             String str;
+			str = "geo fix " + longitude + " " + latitude + "\n";
+			out.print(str);
+			Thread.sleep(1000);
 
             for (int i = 0; i < NUMBER_OF_POINTS-1; i++) {
                 str = "geo fix " + longitude + " " + latitude + "\n";
@@ -70,6 +73,9 @@ public class AndroidTelnet {
                 longitude += DELTA_LONGITUDE;
                 latitude += DELTA_LADITUDE;
             }
+        	while(true){
+
+			}
         } catch (UnknownHostException e) {
             System.exit(-1);
         } catch (IOException e) {
