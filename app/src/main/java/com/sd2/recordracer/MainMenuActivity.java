@@ -3,6 +3,7 @@ package com.sd2.recordracer;
 import java.util.ArrayList;
 import java.util.List;
 import android.app.Activity;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -12,17 +13,29 @@ import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemSelectedListener;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+
 public class MainMenuActivity extends Activity {
 
     private Spinner spinner_exercise;
     private Spinner spinner_playlist;
     private Button btnSubmit;
+    private GoogleMap googleMap;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
+        try{
+            if(googleMap == null) {
+                googleMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+            }
+            googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
         addItemsOnPlaylistSpinner();
         addListenerOnButton();
         addListenerOnSpinnerItemSelection();

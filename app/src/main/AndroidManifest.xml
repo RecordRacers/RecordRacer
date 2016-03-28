@@ -2,9 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.sd2.recordracer">
 
+    <uses-sdk
+        android:minSdkVersion="12"
+        android:targetSdkVersion="23" />
+    <permission android:name="com.example.googlemaps.permission.MAPS_RECIEVE" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.INTERNET" />
-
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <!-- To auto-complete the email text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
@@ -46,11 +52,15 @@
                   android:label="Main Menu after Login"
                   android:parentActivityName=".MainMenuActivity"
                   android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="com.google.android.geo.API_KEY"
-                android:value="AIzaSyBr1WbUINW_Xmt5rBmBmCCvNBg-yHEuDBs">
-            </meta-data>
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBr1WbUINW_Xmt5rBmBmCCvNBg-yHEuDBs"/>
     </application>
 
 </manifest>
