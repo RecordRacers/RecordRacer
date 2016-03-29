@@ -23,6 +23,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainMenuActivity extends Activity {
@@ -33,6 +34,7 @@ public class MainMenuActivity extends Activity {
     private GoogleMap googleMap;
     private EditText desired_pace;
     private float distance;
+    private ArrayList<MarkerOptions> markers;
     private Location start_position; // TODO: set from current location
     private Location end_position;
 
@@ -40,6 +42,7 @@ public class MainMenuActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
+        markers = new ArrayList<MarkerOptions>();
         try{
             if(googleMap == null) {
                 googleMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
@@ -56,9 +59,10 @@ public class MainMenuActivity extends Activity {
                         googleMap.clear();
                         googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
                         googleMap.addMarker(markerOptions);
-                        end_position = new Location("");
+                        markers.add(markerOptions);
+                        /*end_position = new Location("");
                         end_position.setLatitude(latLng.latitude);
-                        end_position.setLongitude(latLng.longitude);
+                        end_position.setLongitude(latLng.longitude);*/
                     }
                 });
             }
@@ -66,8 +70,7 @@ public class MainMenuActivity extends Activity {
             e.printStackTrace();
         }
 
-        distance = calculateDistance(start_position, end_position);
-        addPace();
+        //distance = calculateDistance(start_position, end_position);
         addItemsOnPlaylistSpinner();
         addListenerOnButton();
         addListenerOnSpinnerItemSelection();
@@ -86,10 +89,6 @@ public class MainMenuActivity extends Activity {
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, list);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner_playlist.setAdapter(dataAdapter);
-    }
-
-    public void addPace() {
-        desired_pace = (EditText) findViewById(R.id.target_pace);
     }
 
     public void addListenerOnSpinnerItemSelection() {
