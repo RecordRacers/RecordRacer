@@ -10,8 +10,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
-import com.couchbase.lite.android.AndroidContext;
-
 /**
  * Created by woodr_000 on 3/29/2016.
  */
@@ -73,8 +71,7 @@ public class CreateAccountActivity extends AppCompatActivity {
     }
 
     private void createAccount() {
-        AndroidContext androidContext = new AndroidContext(getApplicationContext());
-        Dao couchDao = new CouchDao(androidContext);
+        Dao couchDao = new CouchDao(this);
         String usernameString = username.getText().toString();
         Editable editablePassword = password.getText();
         String passwordString = editablePassword.toString();

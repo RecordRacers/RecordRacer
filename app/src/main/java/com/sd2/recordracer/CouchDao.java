@@ -1,6 +1,7 @@
 package com.sd2.recordracer;
 
 
+import android.content.Context;
 import android.util.Log;
 
 import com.couchbase.lite.Database;
@@ -21,10 +22,12 @@ public class CouchDao implements Dao {
     final String DB_NAME = "record_racer_db";
     final String TAG = "Record Racer DAO";
 
-    public CouchDao(AndroidContext context) {
+    public CouchDao(Context context) {
 
         try {
-            manager = new Manager(context, Manager.DEFAULT_OPTIONS);
+
+            AndroidContext androidContext = new AndroidContext(context);
+            manager = new Manager(androidContext, Manager.DEFAULT_OPTIONS);
             database = manager.getDatabase(DB_NAME);
         } catch (Exception e) {
             Log.e(TAG, "Error creating database." + e.getMessage());

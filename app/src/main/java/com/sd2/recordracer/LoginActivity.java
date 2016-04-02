@@ -27,6 +27,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.couchbase.lite.android.AndroidContext;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,6 +104,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        //create DAO
+        Dao couchDao = new CouchDao(getApplicationContext());
     }
 
     private void populateAutoComplete() {
@@ -114,13 +119,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
+    private void attemptLogin() {
+        //findthis
+    }
 
     /**
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
-    private void attemptLogin() {
+    private void oldAttemptLogin() {
         if (mAuthTask != null) {
             return;
         }
