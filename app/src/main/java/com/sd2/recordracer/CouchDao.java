@@ -9,9 +9,13 @@ import com.couchbase.lite.Document;
 import com.couchbase.lite.Emitter;
 import com.couchbase.lite.Manager;
 import com.couchbase.lite.Mapper;
+import com.couchbase.lite.Query;
+import com.couchbase.lite.QueryEnumerator;
+import com.couchbase.lite.QueryRow;
 import com.couchbase.lite.View;
 import com.couchbase.lite.android.AndroidContext;
 
+import java.util.Iterator;
 import java.util.Map;
 
 public class CouchDao implements Dao {
@@ -79,7 +83,7 @@ public class CouchDao implements Dao {
     }
 
     public User getUserByEmail(String email) {
-        foundResult = false;
+        /*
         View usersView = database.getView("users");
         final String finalEmail = email;
         usersView.setMap(new Mapper() {
@@ -91,11 +95,28 @@ public class CouchDao implements Dao {
                 }
             }
         }, "1");
-        if (foundResult) {
-            return user;
-        } else {
-            return null;
+        */
+        try {
+            Map<String, Object> currentUser;
+            String usersEmail;
+            Query query = database.createAllDocumentsQuery();
+            QueryEnumerator result = query.run();
+            for (Iterator<QueryRow> it = result; it.hasNext(); ) {
+
+                QueryRow row = it.next();
+                //TODO: row.getDocumentProperties returns null - still need to debug this
+                currentUser = row.getDocumentProperties();
+                usersEmail = (String) currentUser.get("Email");
+                if(usersEmail.compareTo(email)==0) {
+                    return User.mapToObject(currentUser);
+                }
+            }
         }
+        catch(Exception e) {
+            Log.e(TAG, "Error looking for user. " + e.getMessage());
+
+        }
+            return null;
     }
 }
 

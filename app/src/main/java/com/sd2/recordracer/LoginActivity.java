@@ -3,7 +3,6 @@ package com.sd2.recordracer;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ContentResolver;
 import android.content.CursorLoader;
@@ -12,10 +11,11 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build.VERSION;
 import android.os.Build;
+import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -27,8 +27,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.couchbase.lite.android.AndroidContext;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +37,7 @@ import java.util.List;
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor>
 {
     public final static String EMAIL_ADDRESS = "com.mycompany.myfirstapp.EMAIL_ADDRESS";
+    Dao couchDao;
 
     /**
      * A dummy authentication store containing known user names and passwords.
@@ -106,7 +105,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mProgressView = findViewById(R.id.login_progress);
 
         //create DAO
-        Dao couchDao = new CouchDao(getApplicationContext());
+        couchDao = new CouchDao(getApplicationContext());
     }
 
     private void populateAutoComplete() {
@@ -120,7 +119,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private void attemptLogin() {
-        //findthis
+        String email = mEmailView.getText().toString();
+        User user = couchDao.getUserByEmail(email);
+        boolean success = false;
+        if (user!=null) {
+            String password = mPasswordView.getText().toString();
+            if (user.getEncryptedPassword().compareTo(password)==0) {
+                //the password is correct
+                success = true;
+            }
+        }
     }
 
     /**
