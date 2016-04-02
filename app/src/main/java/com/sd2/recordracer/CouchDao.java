@@ -18,7 +18,7 @@ public class CouchDao implements Dao {
     private Database database;
     private User user;
     private boolean foundResult;
-    final String DB_NAME = "RecordRacerDB";
+    final String DB_NAME = "record_racer_db";
     final String TAG = "Record Racer DAO";
 
     public CouchDao(AndroidContext context) {
