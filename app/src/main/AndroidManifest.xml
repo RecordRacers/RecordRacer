@@ -48,6 +48,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.sd2.recordracer.LoginActivity" />
         </activity>
+        <activity
+            android:name=".CreateAccountActivity"
+            android:label="@string/title_activity_create_account"
+            android:parentActivityName=".LoginActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.sd2.recordracer.LoginActivity" />
+        </activity>
         <activity android:name=".MainMenuActivity"
                   android:label="Main Menu after Login"
                   android:parentActivityName=".MainMenuActivity"

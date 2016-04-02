@@ -285,7 +285,7 @@ public class User {
     }
 
 
-    private enum PreferredExercise {
+    public enum PreferredExercise {
         RUNNING, BIKING, NONE
     }
 

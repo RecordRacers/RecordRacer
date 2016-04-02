@@ -368,7 +368,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Gets called when user clicks on the "Register" button
      */
     private void register() {
-
+        Intent intent = new Intent(this, CreateAccountActivity.class);
+        startActivity(intent);
     }
 
     /**

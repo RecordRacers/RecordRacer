@@ -32,8 +32,18 @@ public class CouchDao implements Dao {
 
     }
 
-    public boolean createUser(String username, String encryptedPassword, String email) {
+    public boolean createUser(String username, String encryptedPassword, String email, String sport, int height, int weight, boolean useCentimeters, boolean useKilograms)  {
         User user = new User(username, encryptedPassword, email);
+        if (sport.compareTo("Running")==0) {
+            user.setPreferredExercise(User.PreferredExercise.RUNNING);
+        } else if (sport.compareTo("Biking")==0) {
+            user.setPreferredExercise(User.PreferredExercise.BIKING);
+        } else {
+            user.setPreferredExercise(User.PreferredExercise.NONE);
+        }
+        user.setWeight(weight);
+        user.setUseMetricSystem(useCentimeters);
+        //TODO: below line causes nullpointer exception
         Document document = database.createDocument();
         Map<String, Object> map = user.objectToMap();
         try {
