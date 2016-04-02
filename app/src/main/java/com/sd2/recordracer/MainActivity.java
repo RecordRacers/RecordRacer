@@ -1,6 +1,12 @@
 package com.sd2.recordracer;
 
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,12 +43,14 @@ import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
+
 // this activity is the main activity
 public class MainActivity extends AppCompatActivity implements
         ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
     private GoogleApiClient mGoogleApiClient;
 
+    ResponseReceiver receiver;
 
     boolean playing = false;
     float startTime;
@@ -65,6 +73,9 @@ public class MainActivity extends AppCompatActivity implements
     LocationRequest mLocationRequest;
     float tempDistance;
     final int optimalSampleRate = 44100;
+
+    PendingIntent intervalPendingIntent;
+    Handler handler;
 
     public void onConnectionSuspended (int cause) {
 
@@ -96,59 +107,77 @@ public class MainActivity extends AppCompatActivity implements
 
         //set mock location
 
-        prevLocation = mCurrentLocation;
-        if(prevLocation != null) {
-            mCurrentLocation = location;
-            tempDistance = (long) prevLocation.distanceTo(mCurrentLocation);
-            currDistanceCovered += tempDistance;
-
-            Log.d("currDistanceCovered", "currDistanceCovered = " + String.format("%.2f", currDistanceCovered));
-
-            if(currDistanceCovered >= totalDistance) {
-                stopLocationUpdates();
-                //stop song
-                SuperpoweredExample_PlayPause((Button) findViewById(R.id.playPause));
-                return;
-            }
-            currTime = (System.nanoTime() - startTime) / 1000000000.0f; //s
-            Log.d("Time", "Current time is " + currTime);
-
-            Log.d("expectedRate", "expectedRate = " + String.format("%.5f", expectedRate));
-            Log.d("totalDistance", "totalDistance = " + String.format("%.5f", totalDistance));
-
-            expectedPercent = (expectedRate * currTime / totalDistance);
-            Log.d("expectedPercent", "expectedPercent = " + String.format("%.5f", expectedPercent));
-
-            currPercent = (currDistanceCovered / totalDistance);
-            Log.d("currPercent", "currPercent = " + String.format("%.5f", currPercent));
-
-            if(currPercent > expectedPercent) { //lower freq, speed up
-                newSampleRate = optimalSampleRate - ((currPercent - expectedPercent) * optimalSampleRate);
-            } else {
-                newSampleRate = optimalSampleRate + ((expectedPercent - currPercent) * optimalSampleRate);
-            }
-            Log.d("newSample", "newSample = " + newSampleRate);
-
-            onResamplerValue((int) newSampleRate);
-        }
+//        prevLocation = mCurrentLocation;
+//        if(prevLocation != null) {
+//            mCurrentLocation = location;
+//            tempDistance = (long) prevLocation.distanceTo(mCurrentLocation);
+//            currDistanceCovered += tempDistance;
+//
+//            Log.d("currDistanceCovered", "currDistanceCovered = " + String.format("%.2f", currDistanceCovered));
+//
+//            if(currDistanceCovered >= totalDistance) {
+//                stopLocationUpdates();
+//                //stop song
+//                SuperpoweredExample_PlayPause((Button) findViewById(R.id.playPause));
+//                return;
+//            }
+//            currTime = (System.nanoTime() - startTime) / 1000000000.0f; //s
+//            Log.d("Time", "Current time is " + currTime);
+//
+//            Log.d("expectedRate", "expectedRate = " + String.format("%.5f", expectedRate));
+//            Log.d("totalDistance", "totalDistance = " + String.format("%.5f", totalDistance));
+//
+//            expectedPercent = (expectedRate * currTime / totalDistance);
+//            Log.d("expectedPercent", "expectedPercent = " + String.format("%.5f", expectedPercent));
+//
+//            currPercent = (currDistanceCovered / totalDistance);
+//            Log.d("currPercent", "currPercent = " + String.format("%.5f", currPercent));
+//
+//            if(currPercent > expectedPercent) { //lower freq, speed up
+//                newSampleRate = optimalSampleRate - ((currPercent - expectedPercent) * optimalSampleRate);
+//            } else {
+//                newSampleRate = optimalSampleRate + ((expectedPercent - currPercent) * optimalSampleRate);
+//            }
+//            Log.d("newSample", "newSample = " + newSampleRate);
+//
+//            onResamplerValue((int) newSampleRate);
+//        }
 
 
     }
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
         createLocationRequest();
-        if (mCurrentLocation != null) {
-            mLatitudeText = String.valueOf(mCurrentLocation.getLatitude());
-            mLongitudeText = String.valueOf(mCurrentLocation.getLongitude());
-        }
+//        mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(
+//                mGoogleApiClient);
+
+//        if (mCurrentLocation != null) {
+//            mLatitudeText = String.valueOf(mCurrentLocation.getLatitude());
+//            mLongitudeText = String.valueOf(mCurrentLocation.getLongitude());
+//        }
     }
 
     protected void startLocationUpdates() {
+
+        receiver = new ResponseReceiver();
+
+        Intent intervalIntent = new Intent(this, LocationService.class);
+        intervalPendingIntent = PendingIntent.getService(this, 0, intervalIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        IntentFilter broadcastFilter = new IntentFilter(ResponseReceiver.LOCAL_ACTION);
+
+        getApplicationContext().registerReceiver(receiver, broadcastFilter, null, handler); // Will not run on main thread
+
+        mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        if(mCurrentLocation != null) {
+            Log.d("RECEIVED IN PLAY", "lat = " + String.format("%.8f", mCurrentLocation.getLatitude()) + " long = "
+                    + String.format("%.8f", mCurrentLocation.getLongitude()));
+        }
+
         LocationServices.FusedLocationApi.requestLocationUpdates(
-                mGoogleApiClient, mLocationRequest, (LocationListener) this);
+                mGoogleApiClient, mLocationRequest, intervalPendingIntent);
     }
 
     protected void onPause() {
@@ -156,8 +185,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     protected void stopLocationUpdates() {
-        LocationServices.FusedLocationApi.removeLocationUpdates(
-                mGoogleApiClient, this);
+        intervalPendingIntent.cancel();
     }
 
     protected void createLocationRequest() {
@@ -180,6 +208,14 @@ public class MainActivity extends AppCompatActivity implements
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        receiver = new ResponseReceiver();
+
+        HandlerThread handlerThread = new HandlerThread("ht");
+        handlerThread.start();
+        Looper looper = handlerThread.getLooper();
+        handler = new Handler(looper);
+
         setContentView(R.layout.activity_main);
 
         // Get the device's sample rate and buffer size to enable low-latency Android audio output, if available.
@@ -327,8 +363,6 @@ public class MainActivity extends AppCompatActivity implements
         b.setText(playing ? "Pause" : "Play");
         if(playing) {
             //set prev to null
-            mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(
-                    mGoogleApiClient);
 
             //set start time, distance, and time goals
             startTime = System.nanoTime();
@@ -337,11 +371,24 @@ public class MainActivity extends AppCompatActivity implements
             expectedRate =  totalDistance / timeGoal;
             currDistanceCovered = 0;
 
+
+
             startLocationUpdates();
         } else { //false
             stopLocationUpdates();
+//            try {
+//                unregisterReceiver(receiver);
+//            } catch(Exception e) {
+//                Log.d("receiver null already", "receiver null already");
+//            }
         }
     }
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(receiver);
+        super.onDestroy();
+    }
+
             //1539 covered total distance
             //takes 297.9
     @Override
@@ -351,6 +398,59 @@ public class MainActivity extends AppCompatActivity implements
         return true;
     }
 
+    public class ResponseReceiver extends BroadcastReceiver {
+        public static final String LOCAL_ACTION = "com.sd2.recordracer.ALL_DONE";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //get location from broadcast
+            Location location = (Location) intent.getExtras().get("location");
+
+            prevLocation = mCurrentLocation;
+            if(prevLocation != null) {
+                mCurrentLocation = location;
+                tempDistance = (long) prevLocation.distanceTo(mCurrentLocation);
+                currDistanceCovered += tempDistance;
+
+                Log.d("currDistanceCovered", "currDistanceCovered = " + String.format("%.2f", currDistanceCovered));
+
+                if(currDistanceCovered >= totalDistance) {
+                    stopLocationUpdates();
+                    //stop song
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            SuperpoweredExample_PlayPause((Button) findViewById(R.id.playPause));
+                        }
+                    });
+
+                    return;
+                }
+                currTime = (System.nanoTime() - startTime) / 1000000000.0f; //s
+                Log.d("Time", "Current time is " + currTime);
+
+                Log.d("expectedRate", "expectedRate = " + String.format("%.5f", expectedRate));
+                Log.d("totalDistance", "totalDistance = " + String.format("%.5f", totalDistance));
+
+                expectedPercent = (expectedRate * currTime / totalDistance);
+                Log.d("expectedPercent", "expectedPercent = " + String.format("%.5f", expectedPercent));
+
+                currPercent = (currDistanceCovered / totalDistance);
+                Log.d("currPercent", "currPercent = " + String.format("%.5f", currPercent));
+
+                if(currPercent > expectedPercent) { //lower freq, speed up
+                    newSampleRate = optimalSampleRate - ((currPercent - expectedPercent) * optimalSampleRate);
+                } else {
+                    newSampleRate = optimalSampleRate + ((expectedPercent - currPercent) * optimalSampleRate);
+                }
+                Log.d("newSample", "newSample = " + newSampleRate);
+
+                onResamplerValue((int) newSampleRate);
+            }
+
+
+        }
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
