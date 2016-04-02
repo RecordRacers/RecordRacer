@@ -14,32 +14,25 @@ static void playerEventCallbackA(void *clientData, SuperpoweredAdvancedAudioPlay
         playerA->setFirstBeatMs(353);
         playerA->setPosition(playerA->firstBeatMs, false, false);
     };
+    if (event == SuperpoweredAdvancedAudioPlayerEvent_EOF){
+
+    }
 }
 
-static void playerEventCallbackB(void *clientData, SuperpoweredAdvancedAudioPlayerEvent event, void *value) {
-    if (event == SuperpoweredAdvancedAudioPlayerEvent_LoadSuccess) {
-    	SuperpoweredAdvancedAudioPlayer *playerB = *((SuperpoweredAdvancedAudioPlayer **)clientData);
-        playerB->setBpm(123.0f);
-        playerB->setFirstBeatMs(40);
-        playerB->setPosition(playerB->firstBeatMs, false, false);
-    };
-}
 
 static bool audioProcessing(void *clientdata, short int *audioIO, int numberOfSamples, int samplerate) {
 	return ((SuperpoweredExample *)clientdata)->process(audioIO, numberOfSamples);
 }
 
-SuperpoweredExample::SuperpoweredExample(const char *path, int *params) : activeFx(0), crossValue(0.0f), volB(0.0f), volA(1.0f * headroom) {
+SuperpoweredExample::SuperpoweredExample(const char *path, int *params) : activeFx(0), crossValue(0.0f), volA(1.0f * headroom) {
     pthread_mutex_init(&mutex, NULL); // This will keep our player volumes and playback states in sync.
-    unsigned int samplerate = params[4], buffersize = params[5];
+    unsigned int samplerate = params[2], buffersize = params[3];
     stereoBuffer = (float *)memalign(16, (buffersize + 16) * sizeof(float) * 2);
 
     playerA = new SuperpoweredAdvancedAudioPlayer(&playerA , playerEventCallbackA, samplerate, 0);
     playerA->open(path, params[0], params[1]);
-    playerB = new SuperpoweredAdvancedAudioPlayer(&playerB, playerEventCallbackB, samplerate, 0);
-    playerB->open(path, params[2], params[3]);
 
-    playerA->syncMode = playerB->syncMode = SuperpoweredAdvancedAudioPlayerSyncMode_TempoAndBeat;
+    playerA->syncMode = SuperpoweredAdvancedAudioPlayerSyncMode_TempoAndBeat;
 
     roll = new SuperpoweredRoll(samplerate);
     filter = new SuperpoweredFilter(SuperpoweredFilter_Resonant_Lowpass, samplerate);
@@ -51,7 +44,6 @@ SuperpoweredExample::SuperpoweredExample(const char *path, int *params) : active
 SuperpoweredExample::~SuperpoweredExample() {
     delete audioSystem;
     delete playerA;
-    delete playerB;
     free(stereoBuffer);
     pthread_mutex_destroy(&mutex);
 }
@@ -60,11 +52,9 @@ void SuperpoweredExample::onPlayPause(bool play) {
     pthread_mutex_lock(&mutex);
     if (!play) {
         playerA->pause();
-        playerB->pause();
     } else {
         bool masterIsA = (crossValue <= 0.5f);
         playerA->play(!masterIsA);
-        playerB->play(masterIsA);
     };
     pthread_mutex_unlock(&mutex);
 }
@@ -74,13 +64,10 @@ void SuperpoweredExample::onCrossfader(int value) {
     crossValue = float(value) * 0.01f;
     if (crossValue < 0.01f) {
         volA = 1.0f * headroom;
-        volB = 0.0f;
     } else if (crossValue > 0.99f) {
         volA = 0.0f;
-        volB = 1.0f * headroom;
     } else { // constant power curve
         volA = cosf(M_PI_2 * crossValue) * headroom;
-        volB = cosf(M_PI_2 * (1.0f - crossValue)) * headroom;
     };
     pthread_mutex_unlock(&mutex);
 }
@@ -134,16 +121,32 @@ void SuperpoweredExample::onFxValue(int ivalue) {
 }
 
 void SuperpoweredExample::onResamplerValue(int value){ ;
+    pthread_mutex_lock(&mutex);
     __android_log_print(ANDROID_LOG_VERBOSE, APP_NAME, "The parameter value is: %d", value);
     unsigned int newSampleRate = (unsigned int)value;
     playerA->setSamplerate(newSampleRate);
+    pthread_mutex_unlock(&mutex);
 }
+
+void SuperpoweredExample::onNewSong(const char *path, int *params) {
+    __android_log_print(ANDROID_LOG_VERBOSE, APP_NAME, "To new song!");
+    playerA->open(path, params[0], params[1]);
+    playerA->syncMode = SuperpoweredAdvancedAudioPlayerSyncMode_TempoAndBeat;
+    pthread_mutex_lock(&mutex);
+    bool masterIsA = (crossValue <= 0.5f);
+    playerA->play(!masterIsA);
+    pthread_mutex_unlock(&mutex);
+}
+
 
 bool SuperpoweredExample::process(short int *output, unsigned int numberOfSamples) {
     float masterBpm = playerA->currentBpm;
-    bool silence = !playerA->process(stereoBuffer, false, numberOfSamples, volA, masterBpm, playerB->msElapsedSinceLastBeat);
+    bool silence = !playerA->process(stereoBuffer, false, numberOfSamples, volA, masterBpm, playerA->msElapsedSinceLastBeat);
 
     if (!silence) {
+        flanger->process(stereoBuffer, stereoBuffer, numberOfSamples);
+        roll->process(stereoBuffer, stereoBuffer, numberOfSamples);
+        filter->process(stereoBuffer, stereoBuffer, numberOfSamples);
     };
 
     // The stereoBuffer is ready now, let's put the finished audio into the requested buffers.
@@ -159,6 +162,7 @@ extern "C" {
 	JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onFxOff(JNIEnv *javaEnvironment, jobject self);
 	JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onFxValue(JNIEnv *javaEnvironment, jobject self, jint value);
     JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onResamplerValue(JNIEnv *javaEnvironment, jobject self, jint value);
+    JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onNewSong(JNIEnv *javaEnvironment, jobject self, jstring apkPath, jlongArray offsetAndLength);
 }
 
 static SuperpoweredExample *example = NULL;
@@ -167,8 +171,8 @@ static SuperpoweredExample *example = NULL;
 JNIEXPORT void Java_com_sd2_recordracer_MainActivity_SuperpoweredExample(JNIEnv *javaEnvironment, jobject self, jstring apkPath, jlongArray params) {
 	// Convert the input jlong array to a regular int array.
     jlong *longParams = javaEnvironment->GetLongArrayElements(params, JNI_FALSE);
-    int arr[6];
-    for (int n = 0; n < 6; n++) arr[n] = longParams[n];
+    int arr[4];
+    for (int n = 0; n < 4; n++) arr[n] = longParams[n];
     javaEnvironment->ReleaseLongArrayElements(params, longParams, JNI_ABORT);
 
     const char *path = javaEnvironment->GetStringUTFChars(apkPath, JNI_FALSE);
@@ -199,4 +203,16 @@ JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onFxValue(JNIEnv *javaEnvir
 
 JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onResamplerValue(JNIEnv *javaEnvironment, jobject self, jint value) {
 	example->onResamplerValue(value);
+}
+
+JNIEXPORT void Java_com_sd2_recordracer_MainActivity_onNewSong(JNIEnv *javaEnvironment, jobject self, jstring apkPath, jlongArray params) {
+    // Convert the input jlong array to a regular int array.
+    jlong *longParams = javaEnvironment->GetLongArrayElements(params, JNI_FALSE);
+    int arr[4];
+    for (int n = 0; n < 4; n++) arr[n] = longParams[n];
+    javaEnvironment->ReleaseLongArrayElements(params, longParams, JNI_ABORT);
+
+    const char *path = javaEnvironment->GetStringUTFChars(apkPath, JNI_FALSE);
+    example->onNewSong(path, arr);
+    javaEnvironment->ReleaseStringUTFChars(apkPath, path);
 }

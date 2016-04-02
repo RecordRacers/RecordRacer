@@ -7,4 +7,8 @@ build/
 local.properties
 
 # Idea non-crucial project fileS
+app/src/main/obj/
+.idea/
+app/src/main/libs/
+app/app.iml
 *.iws﻿
