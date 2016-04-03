@@ -12,6 +12,8 @@ import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.QueryRow;
 import com.couchbase.lite.android.AndroidContext;
 
+//import org.apache.shiro.*;
+
 import java.util.Iterator;
 import java.util.Map;
 
@@ -37,6 +39,9 @@ public class CouchDao implements Dao {
     }
 
     public boolean createUser(String username, String encryptedPassword, String email, String sport, int height, int weight, boolean useCentimeters, boolean useKilograms)  {
+
+        //AuthenticationToken token = new UsernamePasswordToken(username,encryptedPassword);
+
         User user = new User(username, encryptedPassword, email);
         if (sport.compareTo("Running")==0) {
             user.setPreferredExercise(User.PreferredExercise.RUNNING);

@@ -56,6 +56,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private TextView success;
+    private TextView password_incorrect;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +67,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
 
+        success = (TextView) findViewById(R.id.success);
+        success.setVisibility(View.GONE);
+        Intent intent = getIntent();
+        Bundle extras = intent.getExtras();
+            if(extras != null) {
+                boolean success_create = extras.getBoolean("Account_Created");
+                if(success_create) {
+                    success.setVisibility(View.VISIBLE);
+                }
+            }
+
+        password_incorrect = (TextView) findViewById(R.id.password_incorrect);
+        password_incorrect.setVisibility(View.GONE);
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -121,17 +136,25 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private void attemptLogin() {
         String email = mEmailView.getText().toString();
         User user = couchDao.getUserByEmail(email);
-        boolean success = false;
+
         if (user!=null) {
             String password = mPasswordView.getText().toString();
             if (user.getEncryptedPassword().compareTo(password)==0) {
                 //the password is correct
-                success = true;
-            } else {
-                //user entered wrong password
+                Intent intent = new Intent(this, MainMenuActivity.class);
+                intent.putExtra("User", user);
+                startActivity(intent);
             }
-        } else {
-            //nobody with that email is registered
+            else {
+                //password was incorrect
+                password_incorrect.setVisibility(View.VISIBLE);
+            }
+        }
+        else {
+            //no user with that email exists
+            if(password_incorrect.getVisibility() == View.GONE) {
+                password_incorrect.setVisibility(View.VISIBLE);
+            }
         }
     }
 

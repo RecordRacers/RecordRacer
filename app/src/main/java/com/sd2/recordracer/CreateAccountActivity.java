@@ -1,5 +1,6 @@
 package com.sd2.recordracer;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -9,6 +10,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 /**
  * Created by woodr_000 on 3/29/2016.
@@ -23,6 +27,7 @@ public class CreateAccountActivity extends AppCompatActivity {
     private EditText height;
     private EditText weight;
     private Spinner sport;
+    private TextView failure;
 
 
     @Override
@@ -38,6 +43,8 @@ public class CreateAccountActivity extends AppCompatActivity {
         weightUnits = (Spinner) findViewById(R.id.create_weightUnits);
         height = (EditText) findViewById(R.id.create_height);
         weight = (EditText) findViewById(R.id.create_weight);
+        failure = (TextView) findViewById(R.id.fail);
+        failure.setVisibility(View.GONE);
 
         Button createAccountButton = (Button) findViewById(R.id.create_account_button);
         createAccountButton.setOnClickListener(new View.OnClickListener() {
@@ -89,8 +96,14 @@ public class CreateAccountActivity extends AppCompatActivity {
             useKilograms=false;
         }
 
-        couchDao.createUser(usernameString,passwordString, emailString, sportString, heightInt, weightInt, useCentimeters, useKilograms);
-
+        if(couchDao.createUser(usernameString,passwordString, emailString, sportString, heightInt, weightInt, useCentimeters, useKilograms)) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.putExtra("Account_Created", true);
+            intent.putExtra("ID", "Create_Account");
+            startActivity(intent);
+        }
+        else {
+            failure.setVisibility(View.VISIBLE);
+        }
     }
-
 }
