@@ -365,7 +365,7 @@ public class User {
         Boolean slowDownMusic = (Boolean) map.get(slowDownMusicKey);
         user.setSlowDownMusic(slowDownMusic.booleanValue());
 
-        Float longestRun = (Float) map.get(longestRunKey);
+        Double longestRun = (Double) map.get(longestRunKey);
         user.setLongestRun(longestRun.floatValue());
 
         Integer fastestMileRun = (Integer) map.get(fastestMileRunKey);
@@ -377,13 +377,13 @@ public class User {
         Integer fastestKilometerRun = (Integer) map.get(fastestKilometerRunKey);
         user.setFastestKilometerRun(fastestKilometerRun.intValue());
 
-        Float totalMilesRun = (Float) map.get(totalMilesRunKey);
+        Double totalMilesRun = (Double) map.get(totalMilesRunKey);
         user.setTotalMilesRun(totalMilesRun.floatValue());
 
         Integer totalRuns = (Integer) map.get(totalRunsKey);
         user.setTotalRuns(totalRuns.intValue());
 
-        Float longestRide = (Float) map.get(longestRideKey);
+        Double longestRide = (Double) map.get(longestRideKey);
         user.setLongestRide(longestRide.floatValue());
 
         Integer fastestMileBiked = (Integer) map.get(fastestMileBikedKey);
@@ -395,7 +395,7 @@ public class User {
         Integer fastestKilometerBiked = (Integer) map.get(fastestKilometerBikedKey);
         user.setFastestKilometerBiked(fastestKilometerBiked.intValue());
 
-        Float totalMilesBiked = (Float) map.get(totalMilesBikedKey);
+        Double totalMilesBiked = (Double) map.get(totalMilesBikedKey);
         user.setTotalMilesBiked(totalMilesBiked.floatValue());
 
         Integer totalRides = (Integer) map.get(totalRidesKey);

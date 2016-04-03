@@ -127,7 +127,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             if (user.getEncryptedPassword().compareTo(password)==0) {
                 //the password is correct
                 success = true;
+            } else {
+                //user entered wrong password
             }
+        } else {
+            //nobody with that email is registered
         }
     }
 

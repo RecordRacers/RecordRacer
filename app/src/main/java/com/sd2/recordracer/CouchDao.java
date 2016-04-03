@@ -6,13 +6,10 @@ import android.util.Log;
 
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
-import com.couchbase.lite.Emitter;
 import com.couchbase.lite.Manager;
-import com.couchbase.lite.Mapper;
 import com.couchbase.lite.Query;
 import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.QueryRow;
-import com.couchbase.lite.View;
 import com.couchbase.lite.android.AndroidContext;
 
 import java.util.Iterator;
@@ -50,52 +47,50 @@ public class CouchDao implements Dao {
         }
         user.setWeight(weight);
         user.setUseMetricSystem(useCentimeters);
-        //TODO: below line causes nullpointer exception
         Document document = database.createDocument();
         Map<String, Object> map = user.objectToMap();
+        String docId = document.getId();
         try {
             document.putProperties(map);
         } catch (Exception e) {
             Log.e(TAG, "Error adding user to database. " + e.getMessage());
             return false;
         }
+        /*
+        Uncomment when debugging. See "info" String for what was just stored in the database
+        Document retrievedDocument = database.getDocument(docId);
+        String info = String.valueOf(retrievedDocument.getProperties());
+        */
         return true;
     }
 
     public User getUserByUsername(String username) {
-        foundResult = false;
-        View usersView = database.getView("users");
-        final String finalUsername = username;
-        usersView.setMap(new Mapper() {
-            @Override
-            public void map(Map<String, Object> document, Emitter emitter) {
-                if (finalUsername.equals(document.get("username"))){
-                    user = User.mapToObject(document);
-                    foundResult = true;
+        try {
+            Map<String, Object> currentUser;
+            String usersUsername;
+            Query query = database.createAllDocumentsQuery();
+            QueryEnumerator result = query.run();
+            for (Iterator<QueryRow> it = result; it.hasNext(); ) {
+
+                QueryRow row = it.next();
+                String docId = row.getSourceDocumentId();
+                Document retrievedDocument = database.getDocument(docId);
+                Map<String, Object> userMap = retrievedDocument.getProperties();
+                String info = String.valueOf(userMap);
+                Log.d(TAG,"Checking user: "+info);
+                usersUsername = (String) userMap.get("Username");
+                if(usersUsername.compareTo(username)==0) {
+                    return User.mapToObject(userMap);
                 }
             }
-        }, "1");
-        if (foundResult) {
-            return user;
-        } else {
-            return null;
         }
+        catch(Exception e) {
+            Log.e(TAG, "Error looking for user. " + e.getMessage());
+        }
+        return null;
     }
 
     public User getUserByEmail(String email) {
-        /*
-        View usersView = database.getView("users");
-        final String finalEmail = email;
-        usersView.setMap(new Mapper() {
-            @Override
-            public void map(Map<String, Object> document, Emitter emitter) {
-                if (finalEmail.equals(document.get("email"))) {
-                    user = User.mapToObject(document);
-                    foundResult = true;
-                }
-            }
-        }, "1");
-        */
         try {
             Map<String, Object> currentUser;
             String usersEmail;
@@ -104,17 +99,19 @@ public class CouchDao implements Dao {
             for (Iterator<QueryRow> it = result; it.hasNext(); ) {
 
                 QueryRow row = it.next();
-                //TODO: row.getDocumentProperties returns null - still need to debug this
-                currentUser = row.getDocumentProperties();
-                usersEmail = (String) currentUser.get("Email");
+                String docId = row.getSourceDocumentId();
+                Document retrievedDocument = database.getDocument(docId);
+                Map<String, Object> userMap = retrievedDocument.getProperties();
+                String info = String.valueOf(userMap);
+                Log.d(TAG,"Checking user: "+info);
+                usersEmail = (String) userMap.get("Email");
                 if(usersEmail.compareTo(email)==0) {
-                    return User.mapToObject(currentUser);
+                    return User.mapToObject(userMap);
                 }
             }
         }
         catch(Exception e) {
             Log.e(TAG, "Error looking for user. " + e.getMessage());
-
         }
             return null;
     }
