@@ -4,7 +4,7 @@ public interface Dao {
     /**
      * @return true if the user was successfully created. False if there was an error.
      */
-    public boolean createUser(String username, String encryptedPassword, String email);
+    public boolean createUser(String username, String encryptedPassword, String email, String sport, int height, int weight, boolean useCentimeters, boolean useKilograms);
 
     /**
      * @return user with specified username if one exists. Null otherwise

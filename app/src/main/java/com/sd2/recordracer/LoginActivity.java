@@ -3,7 +3,6 @@ package com.sd2.recordracer;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ContentResolver;
 import android.content.CursorLoader;
@@ -12,10 +11,11 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build.VERSION;
 import android.os.Build;
+import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -37,6 +37,7 @@ import java.util.List;
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor>
 {
     public final static String EMAIL_ADDRESS = "com.mycompany.myfirstapp.EMAIL_ADDRESS";
+    Dao couchDao;
 
     /**
      * A dummy authentication store containing known user names and passwords.
@@ -55,6 +56,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private TextView success;
+    private TextView password_incorrect;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +67,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
 
+        success = (TextView) findViewById(R.id.success);
+        success.setVisibility(View.GONE);
+        Intent intent = getIntent();
+        Bundle extras = intent.getExtras();
+            if(extras != null) {
+                boolean success_create = extras.getBoolean("Account_Created");
+                if(success_create) {
+                    success.setVisibility(View.VISIBLE);
+                }
+            }
+
+        password_incorrect = (TextView) findViewById(R.id.password_incorrect);
+        password_incorrect.setVisibility(View.GONE);
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -102,6 +118,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        //create DAO
+        couchDao = new CouchDao(getApplicationContext());
     }
 
     private void populateAutoComplete() {
@@ -114,13 +133,37 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
+    private void attemptLogin() {
+        String email = mEmailView.getText().toString();
+        User user = couchDao.getUserByEmail(email);
+
+        if (user!=null) {
+            String password = mPasswordView.getText().toString();
+            if (user.getEncryptedPassword().compareTo(password)==0) {
+                //the password is correct
+                Intent intent = new Intent(this, MainMenuActivity.class);
+                intent.putExtra("User", user);
+                startActivity(intent);
+            }
+            else {
+                //password was incorrect
+                password_incorrect.setVisibility(View.VISIBLE);
+            }
+        }
+        else {
+            //no user with that email exists
+            if(password_incorrect.getVisibility() == View.GONE) {
+                password_incorrect.setVisibility(View.VISIBLE);
+            }
+        }
+    }
 
     /**
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
-    private void attemptLogin() {
+    private void oldAttemptLogin() {
         if (mAuthTask != null) {
             return;
         }
@@ -368,7 +411,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Gets called when user clicks on the "Register" button
      */
     private void register() {
-
+        Intent intent = new Intent(this, CreateAccountActivity.class);
+        startActivity(intent);
     }
 
     /**

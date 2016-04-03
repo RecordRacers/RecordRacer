@@ -23,6 +23,7 @@
     </string>
     <string name="title_activity_forgot_password">Password Reset</string>
     <string name="forgot_password_message">If you are registered, an e-mail has been sent to your address with instructions to reset your password.</string>
+    <string name="title_activity_create_account">Create Account</string>
     <string-array name="exercise_type">
         <item>Running</item>
         <item>Biking</item>

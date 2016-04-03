@@ -88,6 +88,14 @@
 
             </android.support.design.widget.TextInputLayout>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="The email/password combination is incorrect"
+                android:id="@+id/password_incorrect"
+                android:layout_gravity="center_horizontal"
+                android:textColor="#ff0000" />
+
             <Button
                 android:id="@+id/email_sign_in_button"
                 style="?android:textAppearanceSmall"
@@ -124,8 +132,17 @@
                 android:onClick="forgotPassword"
                 android:longClickable="false" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Account Created"
+                android:id="@+id/success"
+                android:layout_gravity="center_horizontal"
+                android:textColor="#1dc100" />
 
 
         </LinearLayout>
     </ScrollView>
+
 </LinearLayout>
