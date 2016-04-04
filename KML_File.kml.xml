@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://earth.google.com/kml/2.x">
+  <Placemark>
+    <name>GE2ADT</name>
+    <description>Attached to the ground. Intelligently places itself
+       at the height of the underlying terrain.</description>
+        <View><longitude>-88.03482</longitude><latitude>43.04186</latitude><range>750000</range><tilt>0</tilt><heading>0</heading></View><styleUrl>#red</styleUrl><Style><IconStyle><scale>0.3</scale></IconStyle><LineStyle><width>0.22</width></LineStyle></Style> <Point><coordinates>-88.03482,43.04186,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+    <name>GE2ADT-1</name>
+    <description>Attached to the ground. Intelligently places itself
+       at the height of the underlying terrain.</description>
+        <View><longitude>-88.03963</longitude><latitude>43.02743</latitude><range>750000</range><tilt>0</tilt><heading>0</heading></View><styleUrl>#red</styleUrl><Style><IconStyle><scale>0.3</scale></IconStyle><LineStyle><width>0.22</width></LineStyle></Style> <Point><coordinates>-88.03963,43.02743,0</coordinates></Point>
+  </Placemark>
+ </kml>
