@@ -32,7 +32,7 @@ public class History extends Activity {
         setContentView(R.layout.activity_history);
 
         listview = (ListView) findViewById(R.id.listView);
-        User user = getIntent().getSerializableExtra("User");
+        User user = (User) getIntent().getSerializableExtra("User");
         ArrayList list = new ArrayList();
         Date date = new Date();
 

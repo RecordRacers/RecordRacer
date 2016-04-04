@@ -32,9 +32,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-/**
- * Created by woodr_000 on 4/3/2016.
- */
 public class setUpWorkout extends Activity implements LocationListener {
 
     private Spinner spinner_exercise;
@@ -49,6 +46,7 @@ public class setUpWorkout extends Activity implements LocationListener {
     private CheckBox checkBox;
     private LocationManager locationManager;
     private Criteria criteria;
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,17 +60,7 @@ public class setUpWorkout extends Activity implements LocationListener {
                 googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                 googleMap.setMyLocationEnabled(true);
                 googleMap.getUiSettings().setZoomControlsEnabled(true);
-                /*googleMap.setOnMapClickListener(new OnMapClickListener() {
-                    @Override
-                    public void onMapClick(LatLng latLng) {
-                        MarkerOptions markerOptions = new MarkerOptions();
-                        markerOptions.position(latLng);
-                        markerOptions.title("Run Location");
-                        googleMap.clear();
-                        googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-                        googleMap.addMarker(markerOptions);
-                    }
-                });*/
+
                 locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
                 criteria = new Criteria();
                 String provider = locationManager.getBestProvider(criteria, true);
@@ -159,6 +147,7 @@ public class setUpWorkout extends Activity implements LocationListener {
         distance_tv = (TextView) findViewById(R.id.distance_textView);
         pace_tv = (TextView) findViewById(R.id.target_pace_textView);
         smart_pace = false;
+        user = (User) getIntent().getSerializableExtra("User");
     }
 
     public void addListenerOnButton() {
@@ -174,6 +163,7 @@ public class setUpWorkout extends Activity implements LocationListener {
                 intent.putExtra("Desired Pace", desired_pace.toString());
                 intent.putExtra("Desired Distance", desired_distance.toString());
                 intent.putExtra("Smart Pace", smart_pace);
+                intent.putExtra("User", user);
                 startActivity(intent);
             }
         });

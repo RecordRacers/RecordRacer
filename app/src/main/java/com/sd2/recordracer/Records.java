@@ -12,13 +12,12 @@ public class Records extends TabActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_records);
-        User user = getIntent().getSerializableExtra("User");
+        User user = (User) getIntent().getSerializableExtra("User");
 
         TabHost tabHost = (TabHost) findViewById(android.R.id.tabhost);
         tabHost.setup();
         TabHost.TabSpec tab1 = tabHost.newTabSpec("Running");
         TabHost.TabSpec tab2 = tabHost.newTabSpec("Biking");
-        //tabHost.setCurrentTab(1);
 
         tab1.setIndicator("Running");
         Intent intent1 = new Intent(this, Running.class);
