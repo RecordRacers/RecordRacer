@@ -1,12 +1,15 @@
 package com.sd2.recordracer;
 
 import android.app.TabActivity;
-import android.os.Bundle;
-import android.widget.TabHost;
 import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.TabHost;
 
 
 public class MainMenuActivity extends TabActivity {
+
+    private String TAG = "Main Menu Activity";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -14,6 +17,13 @@ public class MainMenuActivity extends TabActivity {
         setContentView(R.layout.activity_main_menu);
 
         User user = (User) getIntent().getSerializableExtra("User");
+
+        if (user==null) {
+            Log.d(TAG, "No user was logged in");
+        } else {
+            Log.d(TAG, "Currently logged in user is " + user.getUsername() + " with email: " + user.getEmail());
+        }
+
 
         TabHost tabHost = (TabHost) findViewById(android.R.id.tabhost);
         TabHost.TabSpec tab1 = tabHost.newTabSpec("Workout");

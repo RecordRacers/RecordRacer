@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -38,6 +39,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 {
     public final static String EMAIL_ADDRESS = "com.mycompany.myfirstapp.EMAIL_ADDRESS";
     Dao couchDao;
+    private String TAG = "Login Activity";
 
     /**
      * A dummy authentication store containing known user names and passwords.
@@ -85,6 +87,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                 if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                    Log.d(TAG, "Login being attempted");
                     attemptLogin();
                     return true;
                 }
@@ -136,11 +139,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private void attemptLogin() {
         String email = mEmailView.getText().toString();
         User user = couchDao.getUserByEmail(email);
+        if (user!=null) {
+            Log.d(TAG, "User found: " + user.toString());
+        } else {
+            Log.d(TAG, "No user found with email: " + email);
+        }
 
         if (user!=null) {
             String password = mPasswordView.getText().toString();
             if (user.getEncryptedPassword().compareTo(password)==0) {
                 //the password is correct
+                Log.d(TAG, "Username and password match");
                 Intent intent = new Intent(this, MainMenuActivity.class);
                 intent.putExtra("User", user);
                 startActivity(intent);
