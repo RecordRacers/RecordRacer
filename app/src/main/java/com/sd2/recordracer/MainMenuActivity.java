@@ -1,10 +1,12 @@
 package com.sd2.recordracer;
 
 import android.app.TabActivity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TabHost;
+import android.widget.TextView;
 
 
 public class MainMenuActivity extends TabActivity {
@@ -31,7 +33,7 @@ public class MainMenuActivity extends TabActivity {
         TabHost.TabSpec tab3 = tabHost.newTabSpec("Records");
 
         tab1.setIndicator("Workout");
-        Intent intent1 = new Intent(this, setUpWorkout.class);
+        Intent intent1 = new Intent(this, ChooseWorkoutActivity.class);
         intent1.putExtra("User", user);
         tab1.setContent(intent1);
 
@@ -48,5 +50,6 @@ public class MainMenuActivity extends TabActivity {
         tabHost.addTab(tab1);
         tabHost.addTab(tab2);
         tabHost.addTab(tab3);
+
     }
 }

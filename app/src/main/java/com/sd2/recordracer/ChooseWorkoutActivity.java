@@ -12,6 +12,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -32,7 +33,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class setUpWorkout extends Activity implements LocationListener {
+public class ChooseWorkoutActivity extends Activity implements LocationListener {
 
     private Spinner spinner_exercise;
     private Spinner spinner_playlist;
@@ -54,9 +55,11 @@ public class setUpWorkout extends Activity implements LocationListener {
         setContentView(R.layout.activity_choose_workout);
         try {
             if (googleMap == null) {
+                Log.d("WTF","MAP IS NULL!");
                 googleMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
             }
             if (googleMap != null) {
+                Log.d("WTF","MAP IS NOT NULL");
                 googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                 googleMap.setMyLocationEnabled(true);
                 googleMap.getUiSettings().setZoomControlsEnabled(true);
@@ -64,11 +67,13 @@ public class setUpWorkout extends Activity implements LocationListener {
                 locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
                 criteria = new Criteria();
                 String provider = locationManager.getBestProvider(criteria, true);
+                locationManager.requestLocationUpdates(provider, 2000, 0, this);
+
                 Location location = locationManager.getLastKnownLocation(provider);
+                Log.d("WTF",location.toString());
                 if (location != null) {
                     onLocationChanged(location);
                 }
-                locationManager.requestLocationUpdates(provider, 20000, 0, this);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -84,10 +89,12 @@ public class setUpWorkout extends Activity implements LocationListener {
     public void onLocationChanged(Location location) {
         double latitude, longitude;
         latitude = location.getLatitude();
-        longitude = location.getLatitude();
+        longitude = location.getLongitude();
         LatLng latLng = new LatLng(latitude, longitude);
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+
+        Log.d("WTF", "MAP HAS MOVED CAMERA: "+googleMap.getCameraPosition());
     }
 
     public void onProviderDisabled(String provider) {
@@ -157,7 +164,7 @@ public class setUpWorkout extends Activity implements LocationListener {
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(setUpWorkout.this, MainActivity.class);
+                Intent intent = new Intent(ChooseWorkoutActivity.this, MainActivity.class);
                 intent.putExtra("Playlist", spinner_playlist.toString());
                 intent.putExtra("Exercise", spinner_exercise.toString());
                 intent.putExtra("Desired Pace", desired_pace.toString());

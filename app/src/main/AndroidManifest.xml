@@ -62,7 +62,7 @@
                   android:parentActivityName=".MainMenuActivity"
                   android:theme="@style/AppTheme.NoActionBar">
         </activity>
-        <activity android:name=".setUpWorkout"
+        <activity android:name=".ChooseWorkoutActivity"
             android:label="User workout setup"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>

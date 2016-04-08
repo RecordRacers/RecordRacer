@@ -56,7 +56,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:22.2.1'
     compile 'com.couchbase.lite:couchbase-lite-android:1.2.0'
     compile 'com.android.support:design:22.2.1'
-    //compile 'com.google.android.gms:play-services-maps:8.4.0'
+    compile 'com.google.android.gms:play-services-maps:8.4.0'
     //compile 'org.apache.shiro:shiro-root:1.2.4'
     //compile 'org.apache.maven:maven:3.3.9'
     compile 'com.google.android.gms:play-services:8.4.0'

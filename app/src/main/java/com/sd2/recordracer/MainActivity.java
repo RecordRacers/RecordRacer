@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.os.Build;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.RadioButton;
@@ -43,6 +45,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+
 import android.location.Location;
 
 import com.google.android.gms.common.api.ResultCallback;
@@ -59,7 +62,7 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 
 // this activity is the main activity
 public class MainActivity extends AppCompatActivity implements
-            ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
+        ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
     private List<AssetFileDescriptor> songs = new ArrayList<AssetFileDescriptor>();
     private List<String> songsURI = new ArrayList<String>();
     private int currentSongIndex = 1;
@@ -69,10 +72,10 @@ public class MainActivity extends AppCompatActivity implements
 
     ResponseReceiver receiver;
 
-    boolean playing = false;
+    boolean playing = true;         // music begins right away
     boolean smartPacing = true;
     float startTime;
-    float currTime ;
+    float currTime;
     float totalDistance;
     float startupDistance;
     float pacingDistance = 5.0f;       // 1 mile for optimal smart pacing
@@ -101,11 +104,11 @@ public class MainActivity extends AppCompatActivity implements
     PendingIntent intervalPendingIntent;
     Handler handler;
 
-    public void onConnectionSuspended (int cause) {
+    public void onConnectionSuspended(int cause) {
 
     }
 
-    public void onConnectionFailed (ConnectionResult result) {
+    public void onConnectionFailed(ConnectionResult result) {
 
     }
 
@@ -177,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onConnected(Bundle connectionHint) {
+        Log.d("WTF",">>>>>>>> On Connected!");
         createLocationRequest();
 //        mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(
 //                mGoogleApiClient);
@@ -185,8 +189,22 @@ public class MainActivity extends AppCompatActivity implements
 //            mLatitudeText = String.valueOf(mCurrentLocation.getLatitude());
 //            mLongitudeText = String.valueOf(mCurrentLocation.getLongitude());
 //        }
+        //if (checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for Activity#requestPermissions for more details.
+            //return;
+        //}
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
+
+        Log.d("WTF", ">>>>>>>> START LOCATION UPDATES!!");
+        startLocationUpdates();
+
     }
 
     protected void startLocationUpdates() {
@@ -441,8 +459,9 @@ public class MainActivity extends AppCompatActivity implements
     public void SuperpoweredExample_PlayPause(View button) {  // Play/pause.
         playing = !playing;
 
-        Button b = (Button) findViewById(R.id.playPause);
-        b.setText(playing ? "Pause" : "Play");
+        ImageButton b = (ImageButton) findViewById(R.id.playPause);
+        //b.setText(playing ? "Pause" : "Play");
+        b.setImageDrawable(playing ? getDrawable(R.drawable.pause_btn) : getDrawable(R.drawable.play_btn));
         if(playing) {
             //set prev to null
 
@@ -528,6 +547,26 @@ public class MainActivity extends AppCompatActivity implements
             //get location from broadcast
             Location location = (Location) intent.getExtras().get("location");
 
+            Log.d("WTF",location.toString());
+            // initialize variables
+            if(prevLocation == null) {
+                // Depending on workout mode, set starting variables
+                if(!smartPacing) {
+                    // calculate expected rate
+                    totalDistance = 1538.0f; //meters
+                    timeGoal = 400.0f; //1 sec
+                    expectedRate = totalDistance / timeGoal;
+                }else{
+                    // we nee d to wait before setting rate
+                    expectedRate = 0.0f;
+                    pacingWindowCount = 0;
+
+                }
+                currDistanceCovered = 0;
+                startTime = System.nanoTime();
+                onPlayPause(playing);
+                Log.d("WTF", "MUSIC STARTING!");
+            }
             prevLocation = mCurrentLocation;
 
             if (prevLocation != null) {
@@ -543,7 +582,7 @@ public class MainActivity extends AppCompatActivity implements
 
                 currDistanceCovered += tempDistance;
 
-                Log.d("currDistanceCovered", "currDistanceCovered = " + String.format("%.2f", currDistanceCovered));
+                Log.d("WTF", "currDistanceCovered = " + String.format("%.2f", currDistanceCovered));
 
                 if (!smartPacing) {
                     if (currDistanceCovered >= totalDistance) {
@@ -590,9 +629,9 @@ public class MainActivity extends AppCompatActivity implements
 
                             newSampleRate = 94100.0f - (50000.0f * percentOfSpeedupComplete);
                             onResamplerValue((int) newSampleRate);
-                            Log.d("DEBUG", "SAMPLE RATE RAMPING DOWN: " + newSampleRate);
+                            Log.d("WTF", "SAMPLE RATE RAMPING DOWN: " + newSampleRate);
                         } else {
-                            Log.d("DEBUG", "SAMPLING RATE SHOULD NOW BE CONSTANT");
+                            Log.d("WTF", "SAMPLING RATE SHOULD NOW BE CONSTANT");
                         }
                     } else {
                         // If goal pace has not yet been established
@@ -600,7 +639,7 @@ public class MainActivity extends AppCompatActivity implements
                         if (expectedRate == 0.0f) {
                             startupDistance = currDistanceCovered;
                             expectedRate = currDistanceCovered / currTime;      // average pace thus far
-                            Log.d("DEBUG", "INITIAL RATE SET TO: " + expectedRate);
+                            Log.d("WTF", "INITIAL RATE SET TO: " + expectedRate);
                         } else {
                             // Only update goal pace upon reaching new pacing window
                             if (nextPacingWindow()) {
@@ -610,7 +649,7 @@ public class MainActivity extends AppCompatActivity implements
                                 } else {
                                     expectedRate = (currDistanceCovered) / (currTime);
                                 }
-                                Log.d("DEBUG", "NEXT WINDOW, UPDATED GOAL RATE: " + expectedRate);
+                                Log.d("WTF", "NEXT WINDOW, UPDATED GOAL RATE: " + expectedRate);
                                 // Expand window (the initial acceleration will have least weight)
                                 // pacingDistance = 1.02f * pacingDistance;
                             }

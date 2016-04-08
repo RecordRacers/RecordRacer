@@ -3,54 +3,114 @@
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity">
+    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity"
+    android:padding="0dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="false"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/audio_controls"
+        android:layout_above="@+id/end_workout_btn"
+        android:layout_marginBottom="20dp">
+
+        <ImageButton
+            android:id="@+id/playPause"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:onClick="SuperpoweredExample_PlayPause"
+            android:elegantTextHeight="false"
+            android:src="@drawable/pause_btn"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:padding="20dp" />
+
+        <ImageButton
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/previousBtn"
+            android:layout_toLeftOf="@+id/playPause"
+            android:onClick="previousSong"
+            android:nestedScrollingEnabled="true"
+            android:layout_alignBottom="@+id/playPause"
+            android:elegantTextHeight="false"
+            android:ellipsize="middle"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/prev_btn"
+            android:layout_margin="20dp"
+            android:padding="10dp" />
+
+        <ImageButton
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/nextBtn"
+            android:layout_alignBottom="@+id/playPause"
+            android:layout_toRightOf="@+id/playPause"
+            android:layout_toEndOf="@+id/playPause"
+            android:onClick="nextSong"
+            android:elegantTextHeight="false"
+            android:enabled="false"
+            android:src="@drawable/next_btn"
+            android:background="@null"
+            android:layout_margin="20dp"
+            android:scaleType="fitCenter"
+            android:padding="10dp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
+        android:layout_above="@+id/audio_controls"
+        android:id="@+id/audio_info">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="The World is On Fire"
+            android:id="@+id/songTitle"
+            android:layout_centerHorizontal="true"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="The Real Slim Shady"
+            android:id="@+id/textView2"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/songTitle" />
+    </RelativeLayout>
 
     <Button
-        android:id="@+id/playPause"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="FINISH WORKOUT"
+        android:id="@+id/end_workout_btn"
+        android:layout_alignParentBottom="true"
+        android:background="@color/background_material_dark"
+        android:textColor="@color/abc_primary_text_material_dark"
+        android:textStyle="bold"
+        android:textSize="20dp" />
+
+    <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id="@+id/vinyl"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="35dp"
-        android:onClick="SuperpoweredExample_PlayPause"
-        android:text="PLAY" />
+        android:src="@drawable/vinyl"
+        android:scaleType="fitCenter"
+        android:layout_above="@+id/audio_info"
+        android:padding="30dp" />
 
-    <SeekBar
-        android:id="@+id/crossFader"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/playPause"
-        android:layout_marginTop="35dp" />
-
-    <SeekBar
-        android:id="@+id/rsFader"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:layout_below="@+id/crossFader"
-        android:layout_centerHorizontal="true" />
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="&lt;&lt;"
-        android:id="@+id/previousBtn"
-        android:layout_toLeftOf="@+id/playPause"
-        android:layout_above="@+id/crossFader"
-        android:onClick="previousSong"
-        android:nestedScrollingEnabled="true" />
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=">>"
-        android:id="@+id/nextBtn"
-        android:layout_alignBottom="@+id/playPause"
-        android:layout_toRightOf="@+id/playPause"
-        android:layout_toEndOf="@+id/playPause"
-        android:onClick="nextSong" />
 
 </RelativeLayout>
