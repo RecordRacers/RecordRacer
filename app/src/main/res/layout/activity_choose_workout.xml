@@ -27,7 +27,11 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -42,7 +46,11 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp">
 
             <CheckBox
                 android:layout_width="wrap_content"
@@ -55,49 +63,78 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Distance:"
-                android:id="@+id/distance_textView" />
+                android:id="@+id/target_distance_textView"
+                android:layout_marginRight="10dp" />
 
             <EditText
-                android:layout_width="wrap_content"
+                android:layout_width="170dp"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
                 android:ems="10"
-                android:id="@+id/distance"
-                android:layout_weight="1" />
+                android:id="@+id/target_distance" />
+
+            <Spinner
+                android:layout_width="fill_parent"
+                android:layout_height="match_parent"
+                android:entries="@array/distance_units"
+                android:id="@+id/distance_unit_spinner" />
 
         </LinearLayout>
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Target Pace:"
-                android:id="@+id/target_pace_textView" />
+                android:text="Time:"
+                android:id="@+id/target_time_textView"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="10dp" />
 
             <EditText
-                android:layout_width="match_parent"
+                android:layout_width="192dp"
                 android:layout_height="wrap_content"
                 android:inputType="time"
                 android:ems="10"
-                android:id="@+id/target_pace"
+                android:id="@+id/target_time"
                 android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="match_parent"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="minutes"
+                android:id="@+id/time_unit_label"
+                android:gravity="center_vertical" />
 
         </LinearLayout>
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:layout_marginBottom="15dp">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -123,7 +160,7 @@
                 android:layout_height="match_parent"
                 android:text="Start Workout"
                 android:id="@+id/button"
-                android:background="@color/wallet_holo_blue_light"
+                android:background="#4EC943"
                 android:layout_gravity="center_horizontal"
                 android:textColor="@color/background_material_light"
                 android:textSize="25dp"

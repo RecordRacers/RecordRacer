@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements
     ResponseReceiver receiver;
 
     boolean playing = true;         // music begins right away
-    boolean smartPacing = true;
+    boolean smartPacing;
     float startTime;
     float currTime;
     float totalDistance;
@@ -277,6 +277,13 @@ public class MainActivity extends AppCompatActivity implements
         //startActivity(new Intent(this, LoginActivity.class));
         super.onCreate(savedInstanceState);
 
+        Intent intent = getIntent();
+        smartPacing = intent.getBooleanExtra("Smart Pace",true);
+        totalDistance =  intent.getFloatExtra("Desired Distance",1600.0f); //200.0f; //meters 1538 to test deceleration slowly
+        timeGoal = intent.getFloatExtra("Desired Time",600.0f); // 10 minute default
+        expectedRate =  totalDistance / timeGoal;
+
+        Log.d("WTF","Smart Pacing: "+smartPacing+" Desired Distance: "+totalDistance+" Desired Time: "+timeGoal);
         receiver = new ResponseReceiver();
 
         HandlerThread handlerThread = new HandlerThread("ht");
@@ -456,6 +463,17 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
+    public void onFinishWorkout(View button){
+        Intent intent = new Intent(this, EndWorkoutActivity.class);
+        intent.putExtra("Distance Covered",currDistanceCovered);
+        intent.putExtra("Time Elapsed", currTime);
+
+        if(playing){
+            SuperpoweredExample_PlayPause(null);
+        }
+        startActivity(intent);
+    }
+
     public void SuperpoweredExample_PlayPause(View button) {  // Play/pause.
         playing = !playing;
 
@@ -468,9 +486,9 @@ public class MainActivity extends AppCompatActivity implements
             //set start time, distance, and time goals
             startTime = System.nanoTime();
 
-            totalDistance = 200.0f; //meters 1538 to test deceleration slowly
-            timeGoal = 400.0f; //1 sec
-            expectedRate =  totalDistance / timeGoal;
+//            totalDistance = 200.0f; //meters 1538 to test deceleration slowly
+//            timeGoal = 400.0f; //1 sec
+//            expectedRate =  totalDistance / timeGoal;
 
 
             // Depending on workout mode, set starting variables
@@ -548,14 +566,15 @@ public class MainActivity extends AppCompatActivity implements
             Location location = (Location) intent.getExtras().get("location");
 
             Log.d("WTF",location.toString());
+
             // initialize variables
             if(prevLocation == null) {
                 // Depending on workout mode, set starting variables
                 if(!smartPacing) {
-                    // calculate expected rate
-                    totalDistance = 1538.0f; //meters
-                    timeGoal = 400.0f; //1 sec
-                    expectedRate = totalDistance / timeGoal;
+//                    // calculate expected rate
+//                    totalDistance = 1538.0f; //meters
+//                    timeGoal = 400.0f; //1 sec
+//                    expectedRate = totalDistance / timeGoal;
                 }else{
                     // we nee d to wait before setting rate
                     expectedRate = 0.0f;
@@ -582,19 +601,13 @@ public class MainActivity extends AppCompatActivity implements
 
                 currDistanceCovered += tempDistance;
 
+
+
                 Log.d("WTF", "currDistanceCovered = " + String.format("%.2f", currDistanceCovered));
 
                 if (!smartPacing) {
                     if (currDistanceCovered >= totalDistance) {
-                        stopLocationUpdates();
-                        //stop song
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                SuperpoweredExample_PlayPause((Button) findViewById(R.id.playPause));
-                            }
-                        });
-
+                        onFinishWorkout(null);
                         return;
                     }
 

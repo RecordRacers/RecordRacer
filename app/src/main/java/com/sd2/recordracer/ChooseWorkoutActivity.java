@@ -37,12 +37,14 @@ public class ChooseWorkoutActivity extends Activity implements LocationListener 
 
     private Spinner spinner_exercise;
     private Spinner spinner_playlist;
+    private Spinner spinner_distance_unit;
+    private TextView time_label;
     private Button btnSubmit;
     private GoogleMap googleMap;
     private boolean smart_pace;
     private TextView distance_tv;
     private TextView pace_tv;
-    private EditText desired_pace;
+    private EditText desired_time;
     private EditText desired_distance;
     private CheckBox checkBox;
     private LocationManager locationManager;
@@ -132,14 +134,18 @@ public class ChooseWorkoutActivity extends Activity implements LocationListener 
                 if (((CheckBox) v).isChecked()) {
                     distance_tv.setVisibility(View.GONE);
                     pace_tv.setVisibility(View.GONE);
-                    desired_pace.setVisibility(View.GONE);
+                    desired_time.setVisibility(View.GONE);
                     desired_distance.setVisibility(View.GONE);
+                    spinner_distance_unit.setVisibility(View.GONE);
+                    time_label.setVisibility(View.GONE);
                     smart_pace = true;
                 } else if (!((CheckBox) v).isChecked()) {
                     distance_tv.setVisibility(View.VISIBLE);
                     pace_tv.setVisibility(View.VISIBLE);
-                    desired_pace.setVisibility(View.VISIBLE);
+                    desired_time.setVisibility(View.VISIBLE);
                     desired_distance.setVisibility(View.VISIBLE);
+                    spinner_distance_unit.setVisibility(View.VISIBLE);
+                    time_label.setVisibility(View.VISIBLE);
                     smart_pace = false;
                 }
             }
@@ -149,10 +155,12 @@ public class ChooseWorkoutActivity extends Activity implements LocationListener 
     public void initialize() {
         spinner_exercise = (Spinner) findViewById(R.id.exercise_type_spinner);
         spinner_playlist = (Spinner) findViewById(R.id.spinner_playlist);
-        desired_pace = (EditText) findViewById(R.id.target_pace);
-        desired_distance = (EditText) findViewById(R.id.distance);
-        distance_tv = (TextView) findViewById(R.id.distance_textView);
-        pace_tv = (TextView) findViewById(R.id.target_pace_textView);
+        spinner_distance_unit = (Spinner) findViewById(R.id.distance_unit_spinner);
+        desired_time = (EditText) findViewById(R.id.target_time);
+        desired_distance = (EditText) findViewById(R.id.target_distance);
+        time_label = (TextView) findViewById(R.id.time_unit_label);
+        distance_tv = (TextView) findViewById(R.id.target_distance_textView);
+        pace_tv = (TextView) findViewById(R.id.target_time_textView);
         smart_pace = false;
         user = (User) getIntent().getSerializableExtra("User");
     }
@@ -164,11 +172,23 @@ public class ChooseWorkoutActivity extends Activity implements LocationListener 
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // First convert distance to meters
+                String distance_unit = spinner_distance_unit.toString();
+                Log.d("DESIRED INPUT",desired_distance.getText().toString());
+                Log.d("DESIRED INPUT",desired_time.getText().toString());
+                float meters = Float.parseFloat(desired_distance.getText().toString());
+                if(distance_unit == "km"){
+                    meters = 1000 * meters;
+                }else{
+                    meters = (float) 1609.34 * meters;
+                }
+                float seconds = (float) 60 * Float.parseFloat(desired_time.getText().toString());
+                Log.d("WTF","Seconds: "+seconds+"\t Meters: "+meters);
                 Intent intent = new Intent(ChooseWorkoutActivity.this, MainActivity.class);
                 intent.putExtra("Playlist", spinner_playlist.toString());
                 intent.putExtra("Exercise", spinner_exercise.toString());
-                intent.putExtra("Desired Pace", desired_pace.toString());
-                intent.putExtra("Desired Distance", desired_distance.toString());
+                intent.putExtra("Desired Time", seconds);
+                intent.putExtra("Desired Distance", meters);
                 intent.putExtra("Smart Pace", smart_pace);
                 intent.putExtra("User", user);
                 startActivity(intent);
