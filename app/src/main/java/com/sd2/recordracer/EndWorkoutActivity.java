@@ -210,8 +210,36 @@ public class EndWorkoutActivity extends Activity  {
         }
         if ("Running".compareTo(activityType)==0) {
             caloriesBurned = caloriesBurnedRunning(weightInPounds, miles);
+            if (distance_covered>=3000 && time_elapsed< user.getFastest5kRun()) {
+                user.setFastest5kRun((int) time_elapsed);
+            }
+            if (distance_covered>=1000 && time_elapsed < user.getFastestKilometerRun()) {
+                user.setFastestKilometerRun((int) time_elapsed);
+            }
+            if (distance_covered >=1609 && time_elapsed < user.getFastestMileRun()) {
+                user.setFastestMileRun((int) time_elapsed);
+            }
+            if (distance_covered > user.getLongestRun()) {
+                user.setLongestRun(distance_covered);
+            }
+            user.setTotalRuns(user.getTotalRuns()+1);
+            user.setTotalMilesRun(user.getTotalMilesRun()+(distance_covered/1609.34f));
         } else {
             caloriesBurned = caloriesBurnedBiking(weightInPounds, miles);
+            if (distance_covered>=3000 && time_elapsed< user.getFastest5kBiked()) {
+                user.setFastest5kBiked((int)time_elapsed);
+            }
+            if (distance_covered>=1000 && time_elapsed < user.getFastestKilometerBiked()) {
+                user.setFastestKilometerBiked((int)time_elapsed);
+            }
+            if (distance_covered >=1609 && time_elapsed < user.getFastestMileBiked()) {
+                user.setFastestMileBiked((int)time_elapsed);
+            }
+            if (distance_covered > user.getLongestRide()) {
+                user.setLongestRide(distance_covered);
+            }
+            user.setTotalRides(user.getTotalRides()+1);
+            user.setTotalMilesBiked(user.getTotalMilesBiked()+(distance_covered/1609.34f));
         }
         int seconds = (int) time_elapsed;
         /**
@@ -223,6 +251,7 @@ public class EndWorkoutActivity extends Activity  {
         List<Exercise> exercises = user.getExercises();
         exercises.add(exercise);
         user.setExercises(exercises);
+
         Dao dao = new CouchDao(this);
         dao.updateUser(user);
 
