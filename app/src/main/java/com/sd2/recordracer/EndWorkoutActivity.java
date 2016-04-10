@@ -6,7 +6,6 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -18,6 +17,9 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.Date;
+import java.util.List;
+
 public class EndWorkoutActivity extends Activity implements LocationListener {
     private GoogleMap googleMap;
     private LocationManager locationManager;
@@ -25,6 +27,9 @@ public class EndWorkoutActivity extends Activity implements LocationListener {
     private float distance_covered;
     private float time_elapsed;
     private float average_pace;
+    private User user;
+    private String activityType;
+    private int targetPace;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,8 +40,13 @@ public class EndWorkoutActivity extends Activity implements LocationListener {
 
         distance_covered =  intent.getFloatExtra("Distance Covered",1600.0f);
         time_elapsed =  intent.getFloatExtra("Time Elapsed",300.0f);
-        Log.d("GET_INPUT","DISTANCE COVERED: "+distance_covered);
-        Log.d("GET_INPUT","TIME ELAPSED:"+time_elapsed);
+        user = (User) getIntent().getSerializableExtra("User");
+        activityType = intent.getStringExtra("ActivityType");
+        targetPace = (int) intent.getFloatExtra("ExpectedRate", 0f);
+        Log.d("GET_INPUT", "DISTANCE COVERED: " + distance_covered);
+        Log.d("GET_INPUT", "TIME ELAPSED:" + time_elapsed);
+
+        updateDatabase();
 
 
 
@@ -120,5 +130,44 @@ public class EndWorkoutActivity extends Activity implements LocationListener {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateDatabase() {
+        int weightInPounds = user.getWeight();
+        int caloriesBurned = 0;
+        double miles = distance_covered * 0.000621371;
+        double distance = miles;
+        if (user.isUseMetricSystem()) {
+            //was actually in kilograms - must adjust
+            weightInPounds*=2.20462;
+            distance = distance_covered/1000;
+        }
+        if ("Running".compareTo(activityType)==0) {
+            caloriesBurned = caloriesBurnedRunning(weightInPounds, miles);
+        } else {
+            caloriesBurned = caloriesBurnedBiking(weightInPounds, miles);
+        }
+        int seconds = (int) time_elapsed;
+        /**
+         * activityType is either "Running" or "Biking"
+         * distance is in either km or miles depending on the user's preference
+         *
+         */
+        Exercise exercise = new Exercise(activityType, (float) distance, seconds, targetPace ,caloriesBurned, new Date());
+        List<Exercise> exercises = user.getExercises();
+        exercises.add(exercise);
+        user.setExercises(exercises);
+        Dao dao = new CouchDao(this);
+        dao.updateUser(user);
+
+    }
+
+    private int caloriesBurnedRunning(int pounds, double milesRun) {
+        double cal = pounds*milesRun*.63;
+        return (int) cal;
+    }
+    private int caloriesBurnedBiking(int pounds, double milesBiked) {
+        double cal = pounds*milesBiked*4.54/15;
+        return (int) cal;
     }
 }

@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements
 
     boolean playing = true;         // music begins right away
     boolean smartPacing;
+    String activityType;
     float startTime;
     float currTime;
     float totalDistance;
@@ -103,6 +104,8 @@ public class MainActivity extends AppCompatActivity implements
 
     PendingIntent intervalPendingIntent;
     Handler handler;
+
+    User user;
 
     public void onConnectionSuspended(int cause) {
 
@@ -279,8 +282,10 @@ public class MainActivity extends AppCompatActivity implements
 
         Intent intent = getIntent();
         smartPacing = intent.getBooleanExtra("Smart Pace",true);
-        totalDistance =  intent.getFloatExtra("Desired Distance",1600.0f); //200.0f; //meters 1538 to test deceleration slowly
-        timeGoal = intent.getFloatExtra("Desired Time",600.0f); // 10 minute default
+        totalDistance =  intent.getFloatExtra("Desired Distance", 1600.0f); //200.0f; //meters 1538 to test deceleration slowly
+        timeGoal = intent.getFloatExtra("Desired Time", 600.0f); // 10 minute default
+        user = (User) getIntent().getSerializableExtra("User");
+        activityType = getIntent().getStringExtra("Exercise");
         expectedRate =  totalDistance / timeGoal;
 
         Log.d("WTF","Smart Pacing: "+smartPacing+" Desired Distance: "+totalDistance+" Desired Time: "+timeGoal);
@@ -467,6 +472,9 @@ public class MainActivity extends AppCompatActivity implements
         Intent intent = new Intent(this, EndWorkoutActivity.class);
         intent.putExtra("Distance Covered",currDistanceCovered);
         intent.putExtra("Time Elapsed", currTime);
+        intent.putExtra("User", user);
+        intent.putExtra("ActivityType", activityType);
+        intent.putExtra("ExpectedRate", expectedRate);
 
         if(playing){
             SuperpoweredExample_PlayPause(null);

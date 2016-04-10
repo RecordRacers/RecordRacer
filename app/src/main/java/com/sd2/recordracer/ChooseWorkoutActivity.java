@@ -1,12 +1,7 @@
 package com.sd2.recordracer;
 
 import android.app.Activity;
-import android.location.LocationListener;
-import android.os.Bundle;
-import java.util.ArrayList;
-import java.util.List;
-
-import android.content.Context;
+import android.content.Intent;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -14,24 +9,20 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.CheckBox;
-import android.widget.Toast;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.content.Intent;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChooseWorkoutActivity extends Activity implements LocationListener {
 
@@ -186,7 +177,7 @@ public class ChooseWorkoutActivity extends Activity implements LocationListener 
                 Log.d("WTF","Seconds: "+seconds+"\t Meters: "+meters);
                 Intent intent = new Intent(ChooseWorkoutActivity.this, MainActivity.class);
                 intent.putExtra("Playlist", spinner_playlist.toString());
-                intent.putExtra("Exercise", spinner_exercise.toString());
+                intent.putExtra("Exercise", spinner_exercise.getSelectedItem().toString());
                 intent.putExtra("Desired Time", seconds);
                 intent.putExtra("Desired Distance", meters);
                 intent.putExtra("Smart Pace", smart_pace);
