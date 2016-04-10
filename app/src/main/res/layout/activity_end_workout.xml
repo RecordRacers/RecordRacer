@@ -65,6 +65,13 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="Distance Covered:"
                 android:id="@+id/distance_covered_label" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/distance_covered_text"
+                android:paddingLeft="10dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -82,6 +89,15 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="Time Elapsed:"
                 android:id="@+id/time_elapsed_label" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/time_elapsed_text"
+                android:textIsSelectable="false"
+                android:text="hello"
+                android:paddingLeft="10dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -99,6 +115,13 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="Average Pace:"
                 android:id="@+id/average_pace_label" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/average_pace_text"
+                android:paddingLeft="10dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -116,6 +139,13 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="Calories Burned:"
                 android:id="@+id/calories_burned_label" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/calories_burned_text"
+                android:paddingLeft="10dp" />
         </LinearLayout>
 
         <LinearLayout

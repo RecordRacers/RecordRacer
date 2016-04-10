@@ -174,21 +174,23 @@ public class ChooseWorkoutActivity extends Activity implements LocationListener 
             public void onClick(View v) {
                 // First convert distance to meters
                 String distance_unit = spinner_distance_unit.toString();
-                Log.d("DESIRED INPUT",desired_distance.getText().toString());
-                Log.d("DESIRED INPUT",desired_time.getText().toString());
-                float meters = Float.parseFloat(desired_distance.getText().toString());
-                if(distance_unit == "km"){
-                    meters = 1000 * meters;
-                }else{
-                    meters = (float) 1609.34 * meters;
-                }
-                float seconds = (float) 60 * Float.parseFloat(desired_time.getText().toString());
-                Log.d("WTF","Seconds: "+seconds+"\t Meters: "+meters);
+                Log.d("DESIRED INPUT", desired_distance.getText().toString());
+                Log.d("DESIRED INPUT", desired_time.getText().toString());
                 Intent intent = new Intent(ChooseWorkoutActivity.this, MainActivity.class);
+                if (!smart_pace) {
+                    float meters = Float.parseFloat(desired_distance.getText().toString());
+                    if (distance_unit == "km") {
+                        meters = 1000 * meters;
+                    } else {
+                        meters = (float) 1609.34 * meters;
+                    }
+                    float seconds = (float) 60 * Float.parseFloat(desired_time.getText().toString());
+                    Log.d("WTF", "Seconds: " + seconds + "\t Meters: " + meters);
+                    intent.putExtra("Desired Time", seconds);
+                    intent.putExtra("Desired Distance", meters);
+                }
                 intent.putExtra("Playlist", spinner_playlist.toString());
                 intent.putExtra("Exercise", spinner_exercise.toString());
-                intent.putExtra("Desired Time", seconds);
-                intent.putExtra("Desired Distance", meters);
                 intent.putExtra("Smart Pace", smart_pace);
                 intent.putExtra("User", user);
                 startActivity(intent);
