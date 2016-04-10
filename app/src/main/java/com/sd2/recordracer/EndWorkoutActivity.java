@@ -201,7 +201,6 @@ public class EndWorkoutActivity extends Activity  {
     private void updateDatabase() {
 
         Dao dao = new CouchDao(this);
-        dao.updateUser(user);
 
         int weightInPounds = user.getWeight();
         int caloriesBurned = 0;
@@ -256,6 +255,8 @@ public class EndWorkoutActivity extends Activity  {
         List<Exercise> exercises = user.getExercises();
         exercises.add(exercise);
         user.setExercises(exercises);
+
+        dao.updateUser(user);
     }
 
     private int caloriesBurnedRunning(int pounds, double milesRun) {
