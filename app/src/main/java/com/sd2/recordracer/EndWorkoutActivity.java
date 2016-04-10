@@ -199,10 +199,15 @@ public class EndWorkoutActivity extends Activity  {
     }
 
     private void updateDatabase() {
+
+        Dao dao = new CouchDao(this);
+        dao.updateUser(user);
+
         int weightInPounds = user.getWeight();
         int caloriesBurned = 0;
         double miles = distance_covered * 0.000621371;
         double distance = miles;
+
         if (user.isUseMetricSystem()) {
             //was actually in kilograms - must adjust
             weightInPounds*=2.20462;
@@ -251,10 +256,6 @@ public class EndWorkoutActivity extends Activity  {
         List<Exercise> exercises = user.getExercises();
         exercises.add(exercise);
         user.setExercises(exercises);
-
-        Dao dao = new CouchDao(this);
-        dao.updateUser(user);
-
     }
 
     private int caloriesBurnedRunning(int pounds, double milesRun) {

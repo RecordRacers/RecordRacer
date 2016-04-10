@@ -12,6 +12,7 @@ import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.QueryRow;
 import com.couchbase.lite.android.AndroidContext;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -121,8 +122,6 @@ public class CouchDao implements Dao {
             Log.e(TAG, "Error looking for user. " + e.getMessage());
         }
             return null;
-
-
     }
 
     public void updateUser(User user) throws IllegalArgumentException {
@@ -131,7 +130,10 @@ public class CouchDao implements Dao {
             throw new IllegalArgumentException("The user is not in the database");
         }
         try {
-            document.putProperties(user.objectToMap());
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.putAll(document.getProperties());
+            map.putAll(user.objectToMap());
+            document.putProperties(map);
         } catch(Exception e) {
             Log.e(TAG, e.getMessage());
             throw new IllegalArgumentException("User could not be updated");
