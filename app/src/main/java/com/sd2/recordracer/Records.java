@@ -1,10 +1,8 @@
 package com.sd2.recordracer;
 
-import android.app.Activity;
 import android.app.TabActivity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
 import android.widget.TabHost;
 
 public class Records extends TabActivity {
@@ -27,7 +25,7 @@ public class Records extends TabActivity {
         tab2.setIndicator("Biking");
         Intent intent2 = new Intent(this, Biking.class);
         intent2.putExtra("User", user);
-        tab2.setContent(new Intent(this, Biking.class));
+        tab2.setContent(intent2);
 
         tabHost.addTab(tab1);
         tabHost.addTab(tab2);

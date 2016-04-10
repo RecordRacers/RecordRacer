@@ -1,12 +1,6 @@
 package com.sd2.recordracer;
 
 
-import android.util.Log;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -338,6 +332,7 @@ public class User implements Serializable {
         map.put(totalRidesKey,Integer.valueOf(totalRides));
 
         //add exercises
+        /*
         List<String> serializedExercises = new LinkedList<String>();
         for (Exercise ex: exercises) {
             try {
@@ -356,6 +351,8 @@ public class User implements Serializable {
             map.put(currentKey, serializedExercises.get(i));
         }
         map.put(exercisesKey, exercises);
+        */
+        map.put(exercisesKey,exercises);
 
 
 
@@ -427,7 +424,9 @@ public class User implements Serializable {
         Integer totalRides = (Integer) map.get(totalRidesKey);
         user.setTotalRides(totalRides.intValue());
 
-        List<Exercise> exercises = new LinkedList<Exercise>();
+        List<Exercise> exercises = (List<Exercise>) map.get(exercisesKey);
+        user.setExercises(exercises);
+        /*
         List<String> serializedExercises = (List) map.get(exercisesKey);
 
         int i = 0;
@@ -444,6 +443,7 @@ public class User implements Serializable {
         }
 
         user.setExercises(exercises);
+        */
 
 
         return user;
