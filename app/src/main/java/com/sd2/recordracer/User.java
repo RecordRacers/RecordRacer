@@ -1,6 +1,12 @@
 package com.sd2.recordracer;
 
 
+import android.util.Log;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -332,7 +338,22 @@ public class User implements Serializable {
         map.put(totalRidesKey,Integer.valueOf(totalRides));
 
         //add exercises
+        List<String> serializedExercises = new LinkedList<String>();
+        for (Exercise ex: exercises) {
+            try {
+                ByteArrayOutputStream bo = new ByteArrayOutputStream();
+                ObjectOutputStream so = new ObjectOutputStream(bo);
+                so.writeObject(ex);
+                so.flush();
+                serializedExercises.add(bo.toString());
+            } catch (Exception e) {
+                Log.e("USER", e.getMessage());
+            }
+            serializedExercises.add(ex.objectToMap().toString());
+        }
         map.put(exercisesKey, exercises);
+
+
 
         return map;
     }
@@ -402,7 +423,22 @@ public class User implements Serializable {
         Integer totalRides = (Integer) map.get(totalRidesKey);
         user.setTotalRides(totalRides.intValue());
 
-        user.setExercises((List)map.get(exercisesKey));
+        List<Exercise> exercises = new LinkedList<Exercise>();
+        List<String> serializedExercises = (List) map.get(exercisesKey);
+
+        for(String str : serializedExercises) {
+            try {
+                byte b[] = str.getBytes();
+                ByteArrayInputStream bi = new ByteArrayInputStream(b);
+                ObjectInputStream si = new ObjectInputStream(bi);
+                exercises.add((Exercise) si.readObject());
+            } catch (Exception e) {
+                Log.e("USER", e.getMessage());
+            }
+        }
+
+        user.setExercises(exercises);
+
 
         return user;
     }

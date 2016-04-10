@@ -1,10 +1,11 @@
 package com.sd2.recordracer;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Exercise {
+public class Exercise implements Serializable {
 
     /**
      * distances stored in miles
