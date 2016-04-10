@@ -2,6 +2,7 @@ package com.sd2.recordracer;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +41,10 @@ public class History extends Activity {
         empty.setVisibility(View.GONE);
 
         exercises = user.getExercises();
+
+        Log.d("WTF", user.toString());
+
+        Log.d("WTF", exercises.toString());
 
         if (exercises.isEmpty()) {
             empty.setVisibility(View.VISIBLE);
