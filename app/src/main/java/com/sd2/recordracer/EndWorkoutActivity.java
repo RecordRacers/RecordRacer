@@ -172,6 +172,7 @@ public class EndWorkoutActivity extends Activity  {
 
     public void toMainMenu(View view){
         Intent intent = new Intent(this, MainMenuActivity.class);
+        intent.putExtra("User", user);
         startActivity(intent);
     }
 
