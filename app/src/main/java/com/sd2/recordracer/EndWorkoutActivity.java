@@ -36,6 +36,7 @@ public class EndWorkoutActivity extends Activity  {
     private float average_pace;
     private float calories_burned;
     private ArrayList<LatLng> route;
+    private ArrayList<Location> locationArrayList;
     private TextView distance_covered_text;
     private TextView time_elapsed_text;
     private TextView average_pace_text;
@@ -48,22 +49,18 @@ public class EndWorkoutActivity extends Activity  {
         Intent intent = getIntent();
         double latitude = 29.6510435;
         double longitude = -82.3265487;
-        route = new ArrayList<LatLng>(); // TODO: fill LatLng objects from previous Intent here
+
+        locationArrayList = getIntent().getParcelableArrayListExtra("locationArrayList");; // TODO: fill LatLng objects from previous Intent here
         //route = (ArrayList<LatLng>) intent.getSerializableExtra("Locations");
-
+        route = new ArrayList<LatLng>();
         // tests
-        for(int i = 0; i < 50; i++) {
-            LatLng latLng = new LatLng(latitude, longitude);
+
+        for(int i = 0; i < locationArrayList.size(); i++) {
+            Location location = locationArrayList.get(i);
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
             route.add(latLng);
-            latitude = latitude - 0.00001361;
         }
 
-        latitude = latitude - 0.00001361;
-        for(int i = 0; i < 50; i++) {
-            LatLng latLng = new LatLng(latitude, longitude);
-            route.add(latLng);
-            longitude = longitude + 0.0004174;
-        }
         distance_covered =  intent.getFloatExtra("Distance Covered", 1600.0f);
         time_elapsed =  intent.getFloatExtra("Time Elapsed",300.0f);
 

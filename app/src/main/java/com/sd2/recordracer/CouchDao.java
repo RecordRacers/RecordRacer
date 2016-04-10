@@ -40,7 +40,7 @@ public class CouchDao implements Dao {
 
     public boolean createUser(String username, String encryptedPassword, String email, String sport, int height, int weight, boolean useCentimeters, boolean useKilograms)  {
 
-        if (getUserByEmail(email)==null) {
+        if (getUserByEmail(email)!=null) {
             Log.d(TAG, "User with that email is already in the database.");
             return false;
         }
