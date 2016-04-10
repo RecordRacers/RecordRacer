@@ -351,6 +351,10 @@ public class User implements Serializable {
             }
             serializedExercises.add(ex.objectToMap().toString());
         }
+        for (int i = 0; i!=exercises.size(); ++i) {
+            String currentKey = exercisesKey + String.valueOf(i);
+            map.put(currentKey, serializedExercises.get(i));
+        }
         map.put(exercisesKey, exercises);
 
 
@@ -426,7 +430,9 @@ public class User implements Serializable {
         List<Exercise> exercises = new LinkedList<Exercise>();
         List<String> serializedExercises = (List) map.get(exercisesKey);
 
-        for(String str : serializedExercises) {
+        int i = 0;
+        while (serializedExercises.contains(exercisesKey + String.valueOf(i))) {
+            String str = (String) map.get(exercisesKey + String.valueOf(i));
             try {
                 byte b[] = str.getBytes();
                 ByteArrayInputStream bi = new ByteArrayInputStream(b);
@@ -461,6 +467,4 @@ public class User implements Serializable {
                 map.containsKey(totalMilesBikedKey) && map.containsKey(totalRidesKey) &&
                 map.containsKey(exercisesKey);
     }
-
-
 }
