@@ -1,10 +1,8 @@
 package com.sd2.recordracer;
 
-import android.app.Activity;
 import android.app.TabActivity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
 import android.widget.TabHost;
 
 public class Records extends TabActivity {
