@@ -2,15 +2,9 @@ package com.sd2.recordracer;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.text.Format;
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
@@ -27,14 +21,8 @@ public class Biking extends Activity {
         setContentView(R.layout.activity_bike_record);
 
 
-       // User user = getIntent().getSerializableExtra("User");
-        User user = new User("test", "dummy", "dummy@dummy.com");
-        user.setLongestRide(12.2f);
-        user.setFastestMileBiked(8);
-        user.setFastest5kBiked(5);
-        user.setFastestKilometerBiked(100);
-        user.setTotalMilesBiked(312.3f);
-        user.setTotalRides(40);
+        User user =(User) getIntent().getSerializableExtra("User");
+
 
         float longestRide = user.getLongestRide();
         float fastestMile = user.getFastestMileBiked();
