@@ -13,7 +13,8 @@
         <TabWidget
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@android:id/tabs" >
+            android:id="@android:id/tabs"
+            android:theme="@style/Base.ThemeOverlay.AppCompat.Dark">
         </TabWidget>
 
         <FrameLayout

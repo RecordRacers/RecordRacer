@@ -12,6 +12,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -32,23 +33,23 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-/**
- * Created by woodr_000 on 4/3/2016.
- */
-public class setUpWorkout extends Activity implements LocationListener {
+public class ChooseWorkoutActivity extends Activity implements LocationListener {
 
     private Spinner spinner_exercise;
     private Spinner spinner_playlist;
+    private Spinner spinner_distance_unit;
+    private TextView time_label;
     private Button btnSubmit;
     private GoogleMap googleMap;
     private boolean smart_pace;
     private TextView distance_tv;
     private TextView pace_tv;
-    private EditText desired_pace;
+    private EditText desired_time;
     private EditText desired_distance;
     private CheckBox checkBox;
     private LocationManager locationManager;
     private Criteria criteria;
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,31 +57,25 @@ public class setUpWorkout extends Activity implements LocationListener {
         setContentView(R.layout.activity_choose_workout);
         try {
             if (googleMap == null) {
+                Log.d("WTF","MAP IS NULL!");
                 googleMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
             }
             if (googleMap != null) {
+                Log.d("WTF","MAP IS NOT NULL");
                 googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                 googleMap.setMyLocationEnabled(true);
                 googleMap.getUiSettings().setZoomControlsEnabled(true);
-                /*googleMap.setOnMapClickListener(new OnMapClickListener() {
-                    @Override
-                    public void onMapClick(LatLng latLng) {
-                        MarkerOptions markerOptions = new MarkerOptions();
-                        markerOptions.position(latLng);
-                        markerOptions.title("Run Location");
-                        googleMap.clear();
-                        googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-                        googleMap.addMarker(markerOptions);
-                    }
-                });*/
+
                 locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
                 criteria = new Criteria();
                 String provider = locationManager.getBestProvider(criteria, true);
+                locationManager.requestLocationUpdates(provider, 2000, 0, this);
+
                 Location location = locationManager.getLastKnownLocation(provider);
+                Log.d("WTF",location.toString());
                 if (location != null) {
                     onLocationChanged(location);
                 }
-                locationManager.requestLocationUpdates(provider, 20000, 0, this);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -96,10 +91,12 @@ public class setUpWorkout extends Activity implements LocationListener {
     public void onLocationChanged(Location location) {
         double latitude, longitude;
         latitude = location.getLatitude();
-        longitude = location.getLatitude();
+        longitude = location.getLongitude();
         LatLng latLng = new LatLng(latitude, longitude);
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+
+        Log.d("WTF", "MAP HAS MOVED CAMERA: "+googleMap.getCameraPosition());
     }
 
     public void onProviderDisabled(String provider) {
@@ -137,14 +134,18 @@ public class setUpWorkout extends Activity implements LocationListener {
                 if (((CheckBox) v).isChecked()) {
                     distance_tv.setVisibility(View.GONE);
                     pace_tv.setVisibility(View.GONE);
-                    desired_pace.setVisibility(View.GONE);
+                    desired_time.setVisibility(View.GONE);
                     desired_distance.setVisibility(View.GONE);
+                    spinner_distance_unit.setVisibility(View.GONE);
+                    time_label.setVisibility(View.GONE);
                     smart_pace = true;
                 } else if (!((CheckBox) v).isChecked()) {
                     distance_tv.setVisibility(View.VISIBLE);
                     pace_tv.setVisibility(View.VISIBLE);
-                    desired_pace.setVisibility(View.VISIBLE);
+                    desired_time.setVisibility(View.VISIBLE);
                     desired_distance.setVisibility(View.VISIBLE);
+                    spinner_distance_unit.setVisibility(View.VISIBLE);
+                    time_label.setVisibility(View.VISIBLE);
                     smart_pace = false;
                 }
             }
@@ -154,11 +155,14 @@ public class setUpWorkout extends Activity implements LocationListener {
     public void initialize() {
         spinner_exercise = (Spinner) findViewById(R.id.exercise_type_spinner);
         spinner_playlist = (Spinner) findViewById(R.id.spinner_playlist);
-        desired_pace = (EditText) findViewById(R.id.target_pace);
-        desired_distance = (EditText) findViewById(R.id.distance);
-        distance_tv = (TextView) findViewById(R.id.distance_textView);
-        pace_tv = (TextView) findViewById(R.id.target_pace_textView);
+        spinner_distance_unit = (Spinner) findViewById(R.id.distance_unit_spinner);
+        desired_time = (EditText) findViewById(R.id.target_time);
+        desired_distance = (EditText) findViewById(R.id.target_distance);
+        time_label = (TextView) findViewById(R.id.time_unit_label);
+        distance_tv = (TextView) findViewById(R.id.target_distance_textView);
+        pace_tv = (TextView) findViewById(R.id.target_time_textView);
         smart_pace = false;
+        user = (User) getIntent().getSerializableExtra("User");
     }
 
     public void addListenerOnButton() {
@@ -168,12 +172,27 @@ public class setUpWorkout extends Activity implements LocationListener {
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(setUpWorkout.this, MainActivity.class);
+                // First convert distance to meters
+                String distance_unit = spinner_distance_unit.toString();
+                Log.d("DESIRED INPUT", desired_distance.getText().toString());
+                Log.d("DESIRED INPUT", desired_time.getText().toString());
+                Intent intent = new Intent(ChooseWorkoutActivity.this, MainActivity.class);
+                if (!smart_pace) {
+                    float meters = Float.parseFloat(desired_distance.getText().toString());
+                    if (distance_unit == "km") {
+                        meters = 1000 * meters;
+                    } else {
+                        meters = (float) 1609.34 * meters;
+                    }
+                    float seconds = (float) 60 * Float.parseFloat(desired_time.getText().toString());
+                    Log.d("WTF", "Seconds: " + seconds + "\t Meters: " + meters);
+                    intent.putExtra("Desired Time", seconds);
+                    intent.putExtra("Desired Distance", meters);
+                }
                 intent.putExtra("Playlist", spinner_playlist.toString());
                 intent.putExtra("Exercise", spinner_exercise.toString());
-                intent.putExtra("Desired Pace", desired_pace.toString());
-                intent.putExtra("Desired Distance", desired_distance.toString());
                 intent.putExtra("Smart Pace", smart_pace);
+                intent.putExtra("User", user);
                 startActivity(intent);
             }
         });

@@ -36,7 +36,7 @@ public class customAdapter extends ArrayAdapter<Exercise> {
         distance_ran.setText(Float.toString(exercise.getDistance()));
         time_elapsed = (TextView) row.findViewById(R.id.time_elapsed);
         time_elapsed.setText(Integer.toString(exercise.getTimeElapsed()));
-        target_pace = (TextView) row.findViewById(R.id.pace);
+        target_pace = (TextView) row.findViewById(R.id.target);
         target_pace.setText(Integer.toString(exercise.getTargetPace()));
         caloriesBurned = (TextView) row.findViewById(R.id.calories);
         caloriesBurned.setText(Integer.toString(exercise.getCaloriesBurned()));

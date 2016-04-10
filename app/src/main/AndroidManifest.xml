@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.sd2.recordracer">
+    package="com.sd2.recordracer" >
 
-    <uses-sdk
-        android:minSdkVersion="12"
-        android:targetSdkVersion="23" />
-    <permission android:name="com.sd2.recordracer.permission.MAPS_RECEIVE"
-        android:protectionLevel="signature"/>
+    <permission
+        android:name="com.sd2.recordracer.permission.MAPS_RECEIVE"
+        android:protectionLevel="signature" />
+
     <uses-permission android:name="com.sd2.recordracer.permission.MAPS_RECEIVE" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -18,19 +17,23 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permissions.READ_DATABASE"/>
+    <uses-permission android:name="android.permissioms.WRITE_DATABASE"/>
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme" >
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name" >
         </activity>
         <activity
             android:name=".LoginActivity"
-            android:label="@string/title_activity_login">
+            android:label="@string/title_activity_login" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -41,7 +44,7 @@
             android:name=".ForgotPasswordActivity"
             android:label="@string/title_activity_forgot_password"
             android:parentActivityName=".LoginActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.sd2.recordracer.LoginActivity" />
@@ -50,41 +53,53 @@
             android:name=".CreateAccountActivity"
             android:label="@string/title_activity_create_account"
             android:parentActivityName=".LoginActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.sd2.recordracer.LoginActivity" />
         </activity>
-        <activity android:name=".MainMenuActivity"
-                  android:label="Main Menu after Login"
-                  android:parentActivityName=".MainMenuActivity"
-                  android:theme="@style/AppTheme.NoActionBar">
+        <activity
+            android:name=".MainMenuActivity"
+            android:label="Main Menu after Login"
+            android:parentActivityName=".MainMenuActivity"
+            android:theme="@style/AppTheme.NoActionBar" >
         </activity>
-        <activity android:name=".setUpWorkout"
+        <activity
+            android:name=".ChooseWorkoutActivity"
             android:label="User workout setup"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar" >
         </activity>
         <activity
             android:name=".History"
             android:label="History of previous runs"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar" >
         </activity>
         <activity
             android:name=".Records"
-            android:label="User's best records"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:label="User&apos;s best records"
+            android:theme="@style/AppTheme.NoActionBar" >
         </activity>
-        <activity android:name=".Running"
+        <activity
+            android:name=".Running"
             android:label="Running records"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar" >
         </activity>
-        <activity android:name=".Biking"
+        <activity
+            android:name=".Biking"
             android:label="Biking records"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar" >
         </activity>
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBr1WbUINW_Xmt5rBmBmCCvNBg-yHEuDBs"/>
+            android:value="AIzaSyBr1WbUINW_Xmt5rBmBmCCvNBg-yHEuDBs" />
+
+        <service android:name=".LocationService" />
+
+        <activity
+            android:name=".EndWorkoutActivity"
+            android:label="@string/title_activity_end_workout" >
+        </activity>
     </application>
 
 </manifest>

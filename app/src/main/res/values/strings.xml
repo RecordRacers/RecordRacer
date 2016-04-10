@@ -34,9 +34,9 @@
 
     </string-array>
 
-    <string-array name="velocity_units">
-        <item>mi/hr</item>
-        <item>kil/hr</item>
+    <string-array name="distance_units">
+        <item>mi</item>
+        <item>km</item>
     </string-array>
 
     <!-- Strings related to account creation -->
@@ -48,4 +48,5 @@
         <item>pounds</item>
         <item>kilograms</item>
     </string-array>
+    <string name="title_activity_end_workout">EndWorkoutActivity</string>
 </resources>

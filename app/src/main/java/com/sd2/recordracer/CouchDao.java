@@ -12,10 +12,10 @@ import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.QueryRow;
 import com.couchbase.lite.android.AndroidContext;
 
-//import org.apache.shiro.*;
-
 import java.util.Iterator;
 import java.util.Map;
+
+//import org.apache.shiro.*;
 
 public class CouchDao implements Dao {
     private Manager manager;
@@ -40,7 +40,10 @@ public class CouchDao implements Dao {
 
     public boolean createUser(String username, String encryptedPassword, String email, String sport, int height, int weight, boolean useCentimeters, boolean useKilograms)  {
 
-        //AuthenticationToken token = new UsernamePasswordToken(username,encryptedPassword);
+        if (getUserByEmail(email)==null) {
+            Log.d(TAG, "User with that email is already in the database.");
+            return false;
+        }
 
         User user = new User(username, encryptedPassword, email);
         if (sport.compareTo("Running")==0) {
@@ -94,7 +97,6 @@ public class CouchDao implements Dao {
         }
         return null;
     }
-
     public User getUserByEmail(String email) {
         try {
             Map<String, Object> currentUser;
@@ -119,6 +121,8 @@ public class CouchDao implements Dao {
             Log.e(TAG, "Error looking for user. " + e.getMessage());
         }
             return null;
+
+
     }
 
     public void updateUser(User user) throws IllegalArgumentException {

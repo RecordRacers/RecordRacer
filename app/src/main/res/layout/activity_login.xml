@@ -20,6 +20,13 @@
         android:layout_marginBottom="8dp"
         android:visibility="gone" />
 
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:id="@+id/imageView"
+        android:src="@drawable/vinyl"
+        android:scaleType="fitCenter" />
+
     <ScrollView
         android:id="@+id/login_form"
         android:layout_width="match_parent"
@@ -42,10 +49,11 @@
                 android:id="@+id/app_name"
                 android:layout_gravity="top|center_horizontal"
                 android:text="@string/app_name"
-                android:textStyle="bold|italic"
+                android:textStyle="bold"
                 android:typeface="sans"
                 android:layout_weight="30"
-                android:textSize="40dp" />
+                android:textSize="40dp"
+                android:textIsSelectable="false" />
 
 
             <!--Gallery
@@ -106,7 +114,9 @@
                 android:textStyle="bold"
                 android:layout_weight="0.27"
                 android:height="50dp"
-                android:onClick="signIn" />
+                android:onClick="signIn"
+                android:background="@color/background_material_dark"
+                android:textColor="@color/bright_foreground_material_dark" />
 
             <Button
                 android:id="@+id/email_register_button"
