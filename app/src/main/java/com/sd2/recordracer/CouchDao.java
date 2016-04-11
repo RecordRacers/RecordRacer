@@ -12,6 +12,7 @@ import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.QueryRow;
 import com.couchbase.lite.android.AndroidContext;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -121,7 +122,58 @@ public class CouchDao implements Dao {
             Log.e(TAG, "Error looking for user. " + e.getMessage());
         }
             return null;
+    }
 
+    public void updateUser(User user) throws IllegalArgumentException {
+        Document document = getUserDocument(user);
+        if (document==null) {
+            throw new IllegalArgumentException("The user is not in the database");
+        }
+        try {
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.putAll(document.getProperties());
+            map.putAll(user.objectToMap());
+            document.putProperties(map);
+        } catch(Exception e) {
+            Log.e(TAG, e.getMessage());
+            throw new IllegalArgumentException("User could not be updated");
+        }
+    }
+
+    /**
+     * @param user whose docId is wanted
+     * @return docId of the user, a null string if none found
+     */
+    private Document getUserDocument(User user) {
+
+        try {
+            Map<String, Object> currentUser;
+            String usersUsername;
+            Query query = database.createAllDocumentsQuery();
+            QueryEnumerator result = query.run();
+            String documentId;
+            String username = user.getUsername();
+            for (Iterator<QueryRow> it = result; it.hasNext(); ) {
+
+                QueryRow row = it.next();
+                String docId = row.getSourceDocumentId();
+                Document retrievedDocument = database.getDocument(docId);
+                Map<String, Object> userMap = retrievedDocument.getProperties();
+                String info = String.valueOf(userMap);
+                Log.d(TAG,"Checking user: "+info);
+                usersUsername = (String) userMap.get("Username");
+                int comparison = usersUsername.compareTo(username);
+                if(comparison==0) {
+                    return retrievedDocument;
+                } else {
+                    Log.d(TAG, usersUsername + " and " + username + " are not equal.");
+                }
+            }
+        }
+        catch(Exception e) {
+            Log.e(TAG, "Error looking for user. " + e.getMessage());
+        }
+        return null;
 
     }
 

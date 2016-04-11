@@ -1,10 +1,11 @@
 package com.sd2.recordracer;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Exercise {
+public class Exercise implements Serializable {
 
     /**
      * distances stored in miles
@@ -19,7 +20,7 @@ public class Exercise {
 
     /**
      *
-     * @param type exercise type. Either "run" or "bike"
+     * @param type exercise type. Either "Running" or "Biking"
      * @param distance total distance in miles
      * @param timeElapsed total time elapsed in seconds
      * @param targetPace target pace set in minutes / mile
@@ -27,12 +28,12 @@ public class Exercise {
      * @param date date and time of exercise
      */
     public Exercise(String type, float distance, int timeElapsed, int targetPace, int caloriesBurned, Date date) {
-        if (type.equals("run")) {
+        if (type.equals("Running")) {
             exerciseType = ExerciseType.RUNNING;
-        } else if (type.equals("bike")) {
+        } else if (type.equals("Biking")) {
             exerciseType = ExerciseType.BIKING;
         } else {
-            throw new IllegalArgumentException("The exercise type must be either \"run\" or \"bike\"");
+            throw new IllegalArgumentException("The exercise type must be either \"Running\" or \"Biking\"");
         }
         this.distance=distance;
         this.timeElapsed=timeElapsed;
@@ -101,9 +102,9 @@ public class Exercise {
     public Map<String, Object> objectToMap() {
         Map<String, Object> map = new HashMap<String, Object>();
         if (exerciseType.compareTo(ExerciseType.RUNNING)==0) {
-            map.put("Type", "run");
+            map.put("Type", "Running");
         } else {
-            map.put("Type", "bike");
+            map.put("Type", "Biking");
         }
         map.put("Distance", Float.valueOf(distance));
         map.put("Time Elapsed", Integer.valueOf(timeElapsed));

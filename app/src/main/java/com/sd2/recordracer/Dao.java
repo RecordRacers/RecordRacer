@@ -17,7 +17,6 @@ public interface Dao {
     public User getUserByEmail(String email);
 
     /**
-     *
      * @param user to be updated
      * @throws IllegalArgumentException if the user is not in the database
      */

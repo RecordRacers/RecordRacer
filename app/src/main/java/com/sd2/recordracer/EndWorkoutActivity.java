@@ -7,7 +7,6 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -24,7 +23,11 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.util.Date;
+import java.util.List;
 import java.util.ArrayList;
+
+
 
 public class EndWorkoutActivity extends Activity  {
     private GoogleMap googleMap;
@@ -34,6 +37,9 @@ public class EndWorkoutActivity extends Activity  {
     private float distance_covered;
     private float time_elapsed;
     private float average_pace;
+    private User user;
+    private String activityType;
+    private int targetPace;
     private float calories_burned;
     private ArrayList<LatLng> route;
     private ArrayList<Location> locationArrayList;
@@ -63,6 +69,13 @@ public class EndWorkoutActivity extends Activity  {
 
         distance_covered =  intent.getFloatExtra("Distance Covered", 1600.0f);
         time_elapsed =  intent.getFloatExtra("Time Elapsed",300.0f);
+        user = (User) getIntent().getSerializableExtra("User");
+        activityType = intent.getStringExtra("ActivityType");
+        targetPace = (int) intent.getFloatExtra("ExpectedRate", 0f);
+        Log.d("GET_INPUT", "DISTANCE COVERED: " + distance_covered);
+        Log.d("GET_INPUT", "TIME ELAPSED:" + time_elapsed);
+
+        updateDatabase();
 
         Log.d("GET_INPUT", "DISTANCE COVERED: " + distance_covered);
         Log.d("GET_INPUT","TIME ELAPSED:"+time_elapsed);
@@ -156,6 +169,7 @@ public class EndWorkoutActivity extends Activity  {
 
     public void toMainMenu(View view){
         Intent intent = new Intent(this, MainMenuActivity.class);
+        intent.putExtra("User", user);
         startActivity(intent);
     }
 
@@ -180,5 +194,75 @@ public class EndWorkoutActivity extends Activity  {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateDatabase() {
+
+        Dao dao = new CouchDao(this);
+
+        int weightInPounds = user.getWeight();
+        int caloriesBurned = 0;
+        double miles = distance_covered * 0.000621371;
+        double distance = miles;
+
+        if (user.isUseMetricSystem()) {
+            //was actually in kilograms - must adjust
+            weightInPounds*=2.20462;
+            distance = distance_covered/1000;
+        }
+        if ("Running".compareTo(activityType)==0) {
+            caloriesBurned = caloriesBurnedRunning(weightInPounds, miles);
+            if (distance_covered>=3000 && time_elapsed< user.getFastest5kRun()) {
+                user.setFastest5kRun((int) time_elapsed);
+            }
+            if (distance_covered>=1000 && time_elapsed < user.getFastestKilometerRun()) {
+                user.setFastestKilometerRun((int) time_elapsed);
+            }
+            if (distance_covered >=1609 && time_elapsed < user.getFastestMileRun()) {
+                user.setFastestMileRun((int) time_elapsed);
+            }
+            if (distance_covered > user.getLongestRun()) {
+                user.setLongestRun(distance_covered);
+            }
+            user.setTotalRuns(user.getTotalRuns()+1);
+            user.setTotalMilesRun(user.getTotalMilesRun()+(distance_covered/1609.34f));
+        } else {
+            caloriesBurned = caloriesBurnedBiking(weightInPounds, miles);
+            if (distance_covered>=3000 && time_elapsed< user.getFastest5kBiked()) {
+                user.setFastest5kBiked((int)time_elapsed);
+            }
+            if (distance_covered>=1000 && time_elapsed < user.getFastestKilometerBiked()) {
+                user.setFastestKilometerBiked((int)time_elapsed);
+            }
+            if (distance_covered >=1609 && time_elapsed < user.getFastestMileBiked()) {
+                user.setFastestMileBiked((int)time_elapsed);
+            }
+            if (distance_covered > user.getLongestRide()) {
+                user.setLongestRide(distance_covered);
+            }
+            user.setTotalRides(user.getTotalRides()+1);
+            user.setTotalMilesBiked(user.getTotalMilesBiked()+(distance_covered/1609.34f));
+        }
+        int seconds = (int) time_elapsed;
+        /**
+         * activityType is either "Running" or "Biking"
+         * distance is in either km or miles depending on the user's preference
+         *
+         */
+        Exercise exercise = new Exercise(activityType, (float) distance, seconds, targetPace ,caloriesBurned, new Date());
+        List<Exercise> exercises = user.getExercises();
+        exercises.add(exercise);
+        user.setExercises(exercises);
+
+        dao.updateUser(user);
+    }
+
+    private int caloriesBurnedRunning(int pounds, double milesRun) {
+        double cal = pounds*milesRun*.63;
+        return (int) cal;
+    }
+    private int caloriesBurnedBiking(int pounds, double milesBiked) {
+        double cal = pounds*milesBiked*4.54/15;
+        return (int) cal;
     }
 }

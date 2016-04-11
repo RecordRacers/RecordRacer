@@ -332,7 +332,29 @@ public class User implements Serializable {
         map.put(totalRidesKey,Integer.valueOf(totalRides));
 
         //add exercises
+        /*
+        List<String> serializedExercises = new LinkedList<String>();
+        for (Exercise ex: exercises) {
+            try {
+                ByteArrayOutputStream bo = new ByteArrayOutputStream();
+                ObjectOutputStream so = new ObjectOutputStream(bo);
+                so.writeObject(ex);
+                so.flush();
+                serializedExercises.add(bo.toString());
+            } catch (Exception e) {
+                Log.e("USER", e.getMessage());
+            }
+            serializedExercises.add(ex.objectToMap().toString());
+        }
+        for (int i = 0; i!=exercises.size(); ++i) {
+            String currentKey = exercisesKey + String.valueOf(i);
+            map.put(currentKey, serializedExercises.get(i));
+        }
         map.put(exercisesKey, exercises);
+        */
+        map.put(exercisesKey,exercises);
+
+
 
         return map;
     }
@@ -402,7 +424,27 @@ public class User implements Serializable {
         Integer totalRides = (Integer) map.get(totalRidesKey);
         user.setTotalRides(totalRides.intValue());
 
-        user.setExercises((List)map.get(exercisesKey));
+        List<Exercise> exercises = (List<Exercise>) map.get(exercisesKey);
+        user.setExercises(exercises);
+        /*
+        List<String> serializedExercises = (List) map.get(exercisesKey);
+
+        int i = 0;
+        while (serializedExercises.contains(exercisesKey + String.valueOf(i))) {
+            String str = (String) map.get(exercisesKey + String.valueOf(i));
+            try {
+                byte b[] = str.getBytes();
+                ByteArrayInputStream bi = new ByteArrayInputStream(b);
+                ObjectInputStream si = new ObjectInputStream(bi);
+                exercises.add((Exercise) si.readObject());
+            } catch (Exception e) {
+                Log.e("USER", e.getMessage());
+            }
+        }
+
+        user.setExercises(exercises);
+        */
+
 
         return user;
     }
@@ -425,6 +467,4 @@ public class User implements Serializable {
                 map.containsKey(totalMilesBikedKey) && map.containsKey(totalRidesKey) &&
                 map.containsKey(exercisesKey);
     }
-
-
 }
