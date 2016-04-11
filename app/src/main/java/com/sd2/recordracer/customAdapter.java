@@ -1,6 +1,7 @@
 package com.sd2.recordracer;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,15 +24,17 @@ public class customAdapter extends ArrayAdapter<Exercise> {
     private Exercise exercise;
     private Format formatter = new SimpleDateFormat("yyyy-MM-dd");
 
-    customAdapter(Context context, List exercise_history) {
+    customAdapter(Context context, List<Exercise> exercise_history) {
         super(context, R.layout.history_entry, exercise_history);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        exercise = getItem(position);
         LayoutInflater inflate = LayoutInflater.from(getContext());
         View row = inflate.inflate(R.layout.history_entry, parent, false);
+        Log.d("WTF", getItem(position).toString());
+        Log.d("WTF", getItem(position).getDate().toString());
+        exercise = (Exercise) getItem(position);
         distance_ran = (TextView) row.findViewById(R.id.distance);
         distance_ran.setText(Float.toString(exercise.getDistance()));
         time_elapsed = (TextView) row.findViewById(R.id.time_elapsed);
