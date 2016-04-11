@@ -24,8 +24,8 @@ import java.util.List;
 public class History extends Activity {
 
     private ListView listview;
-    private ListAdapter listAdapter;
-    private List exercises;
+    private CustomAdapter listAdapter;
+    private List<Exercise> exercises;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +51,7 @@ public class History extends Activity {
         }
 
         else {
-            listAdapter = new customAdapter(this, exercises);
+            listAdapter = new CustomAdapter(this, exercises);
             listview.setAdapter(listAdapter);
         }
     }

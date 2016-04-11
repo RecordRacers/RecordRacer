@@ -8,13 +8,16 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
 /*Used to display data about previous runs dynamically
 */
-public class customAdapter extends ArrayAdapter<Exercise> {
+public class CustomAdapter extends ArrayAdapter<Exercise> {
 
     private TextView distance_ran;
     private TextView time_elapsed;
@@ -22,19 +25,22 @@ public class customAdapter extends ArrayAdapter<Exercise> {
     private TextView caloriesBurned;
     private TextView date;
     private Exercise exercise;
+    private List<Exercise> exercises;
     private Format formatter = new SimpleDateFormat("yyyy-MM-dd");
+    private ObjectMapper objMapper;
 
-    customAdapter(Context context, List<Exercise> exercise_history) {
+    CustomAdapter(Context context, List<Exercise> exercise_history) {
         super(context, R.layout.history_entry, exercise_history);
+        this.exercises = exercise_history;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflate = LayoutInflater.from(getContext());
         View row = inflate.inflate(R.layout.history_entry, parent, false);
-        Log.d("WTF", getItem(position).toString());
-        Log.d("WTF", getItem(position).getDate().toString());
-        exercise = (Exercise) getItem(position);
+        Log.d("WTF","Position in Adapter: "+position);
+        Log.d("WTF","Exercises: "+this.exercises);
+        exercise = this.exercises.get(position);
         distance_ran = (TextView) row.findViewById(R.id.distance);
         distance_ran.setText(Float.toString(exercise.getDistance()));
         time_elapsed = (TextView) row.findViewById(R.id.time_elapsed);
