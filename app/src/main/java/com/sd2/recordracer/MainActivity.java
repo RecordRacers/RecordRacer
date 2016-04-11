@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 
 import android.content.IntentSender;
@@ -67,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements
     private List<String> songsURI = new ArrayList<String>();
     private int currentSongIndex = 1;
     private String samplerateString = null, buffersizeString = null;
-
+    private List<Location> locationArrayList;
     private GoogleApiClient mGoogleApiClient;
 
     ResponseReceiver receiver;
@@ -279,6 +280,7 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         //startActivity(new Intent(this, LoginActivity.class));
         super.onCreate(savedInstanceState);
+        locationArrayList = new ArrayList<Location>();
 
         Intent intent = getIntent();
         smartPacing = intent.getBooleanExtra("Smart Pace",true);
@@ -475,6 +477,7 @@ public class MainActivity extends AppCompatActivity implements
         intent.putExtra("User", user);
         intent.putExtra("ActivityType", activityType);
         intent.putExtra("ExpectedRate", expectedRate);
+        intent.putParcelableArrayListExtra("locationArrayList", (ArrayList<Location>) locationArrayList);
 
         if(playing){
             SuperpoweredExample_PlayPause(null);
@@ -598,6 +601,7 @@ public class MainActivity extends AppCompatActivity implements
 
             if (prevLocation != null) {
                 mCurrentLocation = location;
+                locationArrayList.add(location);
 
                 currTime = (System.nanoTime() - startTime) / 1000000000.0f; //s
                 tempDistance = (long) prevLocation.distanceTo(mCurrentLocation);
