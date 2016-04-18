@@ -534,8 +534,18 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onDestroy() {
-            unregisterReceiver(receiver);
-            super.onDestroy();
+
+        try {
+            stopLocationUpdates();
+        } catch(Exception e) {
+
+        }
+        try {
+            stopLocationUpdates();
+        } catch(Exception e) {
+
+        }
+        super.onDestroy();
     }
 
     public void SuperpoweredExample_NewSong() {  // go to next song in queue
@@ -604,13 +614,17 @@ public class MainActivity extends AppCompatActivity implements
                 locationArrayList.add(location);
 
                 currTime = (System.nanoTime() - startTime) / 1000000000.0f; //s
-                tempDistance = (long) prevLocation.distanceTo(mCurrentLocation);
-
-                if(tempDistance > 5.0f) {
-                    tempDistance = 0.0f;
-                    mCurrentLocation = prevLocation;
-                }
-
+                tempDistance = (float) prevLocation.distanceTo(mCurrentLocation);
+                Log.d("PREV LOCATION", "lat = " + String.format("%.8f", prevLocation.getLatitude()) + " long = "
+                        + String.format("%.8f", prevLocation.getLongitude()));
+                Log.d("CURR LOCATION", "lat = " + String.format("%.8f", mCurrentLocation.getLatitude()) + " long = "
+                        + String.format("%.8f", mCurrentLocation.getLongitude()));
+                Log.d("WTF", "tempDistance = " + String.format("%.10f", tempDistance));
+//                if(tempDistance > 5.0f) {
+//                    tempDistance = 0.0f;
+//                    mCurrentLocation = prevLocation;
+//                }
+                Log.d("WTF", "tempDistance =  = " + String.format("%.10f", tempDistance));
                 currDistanceCovered += tempDistance;
 
 
@@ -619,7 +633,12 @@ public class MainActivity extends AppCompatActivity implements
 
                 if (!smartPacing) {
                     if (currDistanceCovered >= totalDistance) {
-                        onFinishWorkout(null);
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                onFinishWorkout(null);
+                            }
+                        });
+
                         return;
                     }
 

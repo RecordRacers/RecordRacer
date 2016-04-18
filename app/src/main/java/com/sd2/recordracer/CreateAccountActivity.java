@@ -29,7 +29,6 @@ public class CreateAccountActivity extends AppCompatActivity {
     private Spinner sport;
     private TextView failure;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

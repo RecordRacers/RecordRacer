@@ -24,7 +24,10 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChooseWorkoutActivity extends Activity implements LocationListener {
+public class ChooseWorkoutActivity extends Activity
+        implements LocationListener
+         {
+
 
     private Spinner spinner_exercise;
     private Spinner spinner_playlist;
@@ -77,6 +80,18 @@ public class ChooseWorkoutActivity extends Activity implements LocationListener 
         addItemsOnPlaylistSpinner();
         addListenerOnButton();
         addListenerOnSpinnerItemSelection();
+    }
+
+             protected void onDestroy() {
+                 super.onDestroy();
+                 Log.d("WTF", "LOCATION MANAGER REMOVED UPDATES");
+                 locationManager.removeUpdates(this);
+             }
+
+             protected void onPause() {
+        super.onPause();
+        Log.d("WTF", "LOCATION MANAGER REMOVED UPDATES");
+        locationManager.removeUpdates(this);
     }
 
     public void onLocationChanged(Location location) {
