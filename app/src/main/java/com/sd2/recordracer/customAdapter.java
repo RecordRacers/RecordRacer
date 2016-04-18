@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.text.Format;
@@ -26,7 +28,9 @@ public class CustomAdapter extends ArrayAdapter<Exercise> {
     private TextView caloriesBurned;
     private TextView date;
     private Exercise exercise;
+    private List<Exercise> exercises;
     private Format formatter = new SimpleDateFormat("yyyy-MM-dd");
+    private ObjectMapper objMapper;
 
     private ArrayList<Exercise> objects;
 
